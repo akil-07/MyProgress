@@ -5,6 +5,7 @@ import Document from './Document.jsx'
 import Tasks from './Tasks.jsx'
 import Attendance from './Attendance.jsx'
 import Assignments from './Assignments.jsx'
+import ChatAssistant from '../components/Chat/ChatAssistant.jsx'
 import SemesterPlanner from './SemesterPlanner.jsx'
 import Profile from './Profile.jsx'
 import usePageStore from '../store/pageStore.js'
@@ -48,6 +49,8 @@ export default function Home() {
                     <Route path="/profile" element={<Profile />} />
                 </Routes>
             </main>
+
+            <ChatAssistant />
         </div>
     )
 }

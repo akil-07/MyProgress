@@ -1,6 +1,52 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { continueDocWriting, summarizeDocText, isGeminiConfigured } from '../../services/gemini.js';
 
 const ALL_COMMANDS = [
+    {
+        group: 'AI Magic ✨',
+        items: [
+            {
+                icon: '✍️', label: 'Continue Writing', desc: 'AI writes the next paragraph', keywords: ['ai', 'continue', 'write'],
+                cmd: async (ed) => {
+                    if (!isGeminiConfigured) {
+                        alert("Gemini API key is missing. Add VITE_GEMINI_API_KEY to your .env file.");
+                        return;
+                    }
+                    // Insert loading state
+                    ed.chain().focus().insertContent({ type: 'text', marks: [{ type: 'italic' }], text: ' (AI is thinking...) ' }).run();
+                    try {
+                        const context = ed.state.doc.textContent;
+                        const result = await continueDocWriting(context);
+                        // A rough way to replace the loading text: just undo and insert
+                        ed.commands.undo();
+                        ed.chain().focus().insertContent('\n\n' + result).run();
+                    } catch (e) {
+                        ed.commands.undo();
+                        alert('Error: ' + e.message);
+                    }
+                }
+            },
+            {
+                icon: '📑', label: 'Summarize', desc: 'AI summarizes the document', keywords: ['ai', 'summarize', 'summary'],
+                cmd: async (ed) => {
+                    if (!isGeminiConfigured) {
+                        alert("Gemini API key is missing. Add VITE_GEMINI_API_KEY to your .env file.");
+                        return;
+                    }
+                    ed.chain().focus().insertContent({ type: 'text', marks: [{ type: 'italic' }], text: ' (AI is summarizing...) ' }).run();
+                    try {
+                        const context = ed.state.doc.textContent;
+                        const result = await summarizeDocText(context);
+                        ed.commands.undo();
+                        ed.chain().focus().insertContent('\n\n**Summary:**\n' + result).run();
+                    } catch (e) {
+                        ed.commands.undo();
+                        alert('Error: ' + e.message);
+                    }
+                }
+            }
+        ]
+    },
     {
         group: 'Basic Blocks',
         items: [
