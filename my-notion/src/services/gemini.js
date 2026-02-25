@@ -109,10 +109,19 @@ export async function askGeminiChat(messages) {
         tools
     });
 
-    const geminiHistory = messages.slice(0, -1).map(m => ({
-        role: m.role === 'assistant' || m.role === 'model' ? 'model' : 'user',
-        parts: [{ text: m.content }]
-    }));
+    const geminiHistory = [];
+    messages.slice(0, -1).forEach(m => {
+        const role = m.role === 'assistant' || m.role === 'model' ? 'model' : 'user';
+        // Skip any leading model messages (like the greeting)
+        if (geminiHistory.length === 0 && role === 'model') return;
+
+        // Merge consecutive messages of the same role (Gemini requires alternating roles)
+        if (geminiHistory.length > 0 && geminiHistory[geminiHistory.length - 1].role === role) {
+            geminiHistory[geminiHistory.length - 1].parts[0].text += '\n\n' + m.content;
+        } else {
+            geminiHistory.push({ role, parts: [{ text: m.content }] });
+        }
+    });
 
     const lastMessage = messages[messages.length - 1].content;
     const chat = model.startChat({ history: geminiHistory });
