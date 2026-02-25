@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { askGemini, isGeminiConfigured } from '../../services/gemini.js';
+import { askGeminiChat, isGeminiConfigured } from '../../services/gemini.js';
 
 export default function ChatAssistant() {
     const [isOpen, setIsOpen] = useState(false);
@@ -20,18 +20,17 @@ export default function ChatAssistant() {
 
         const userMsg = input.trim();
         setInput('');
-        setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+
+        const newMessages = [...messages, { role: 'user', content: userMsg }];
+        setMessages(newMessages);
         setLoading(true);
 
         try {
             if (!isGeminiConfigured) {
                 throw new Error("Gemini API key is not configured in .env (VITE_GEMINI_API_KEY)");
             }
-            // For a complete conversational chatbot, history can be passed, 
-            // but here we just pass the full text as context for simplicity
-            const prompt = messages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') + `\nUser: ${userMsg}\nAssistant:`;
 
-            const reply = await askGemini(prompt);
+            const reply = await askGeminiChat(newMessages);
             setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
         } catch (error) {
             setMessages(prev => [...prev, { role: 'assistant', content: `Error: ${error.message}` }]);
