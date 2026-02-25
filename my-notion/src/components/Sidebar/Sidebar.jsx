@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { signOut } from 'firebase/auth'
+import { auth, isFirebaseConfigured } from '../../services/firebase.js'
 import usePageStore from '../../store/pageStore.js'
 import useTaskStore from '../../store/taskStore.js'
 import SearchModal from '../Search/SearchModal.jsx'
@@ -12,6 +14,13 @@ export default function Sidebar() {
     const { pages, createPage, deletePage, updatePage, setActivePage } = usePageStore()
     const { tasks } = useTaskStore()
     const pendingTasks = tasks.filter(t => !t.completed).length
+
+    const handleLogout = async () => {
+        if (auth && isFirebaseConfigured) {
+            await signOut(auth)
+            navigate('/')
+        }
+    }
 
     const [showSearch, setShowSearch] = useState(false)
     const [contextMenu, setContextMenu] = useState(null)
@@ -138,8 +147,11 @@ export default function Sidebar() {
 
                 {/* Footer */}
                 <div className="sidebar-footer">
-                    <div style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
-                        ✦ MyNotion — stored locally
+                    <div style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span>✦ synced via Firebase</span>
+                        {isFirebaseConfigured && (
+                            <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={handleLogout}>Sign Out</span>
+                        )}
                     </div>
                 </div>
             </aside>
