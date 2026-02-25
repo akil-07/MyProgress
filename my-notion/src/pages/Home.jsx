@@ -6,6 +6,7 @@ import Tasks from './Tasks.jsx'
 import Attendance from './Attendance.jsx'
 import Assignments from './Assignments.jsx'
 import SemesterPlanner from './SemesterPlanner.jsx'
+import Profile from './Profile.jsx'
 import usePageStore from '../store/pageStore.js'
 
 export default function Home() {
@@ -44,6 +45,7 @@ export default function Home() {
                     <Route path="/attendance" element={<Attendance />} />
                     <Route path="/assignments" element={<Assignments />} />
                     <Route path="/semester" element={<SemesterPlanner />} />
+                    <Route path="/profile" element={<Profile />} />
                 </Routes>
             </main>
         </div>

@@ -4,6 +4,7 @@ import { signOut } from 'firebase/auth'
 import { auth, isFirebaseConfigured } from '../../services/firebase.js'
 import usePageStore from '../../store/pageStore.js'
 import useTaskStore from '../../store/taskStore.js'
+import useAuthStore from '../../store/authStore.js'
 import SearchModal from '../Search/SearchModal.jsx'
 
 const EMOJIS = ['📄', '📝', '📌', '🗒️', '💡', '🎯', '🚀', '📚', '🗂️', '⭐', '🔥', '💎', '🌟', '🎨', '🏆', '🔖', '🧠', '✨', '🎪', '🌈', '🦋', '🦄', '🔬', '🍀', '🏔️', '🌊', '🎵', '🎮', '🌸', '🏄']
@@ -13,6 +14,7 @@ export default function Sidebar() {
     const { pageId } = useParams()
     const { pages, createPage, deletePage, updatePage, setActivePage } = usePageStore()
     const { tasks } = useTaskStore()
+    const { user } = useAuthStore()
     const pendingTasks = tasks.filter(t => !t.completed).length
 
     const handleLogout = async () => {
@@ -145,15 +147,30 @@ export default function Sidebar() {
                     </button>
                 </div>
 
-                {/* Footer */}
-                <div className="sidebar-footer">
-                    <div style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span>✦ synced via Firebase</span>
-                        {isFirebaseConfigured && (
-                            <span style={{ cursor: 'pointer', textDecoration: 'underline' }} onClick={handleLogout}>Sign Out</span>
-                        )}
+                {user ? (
+                    <div className="sidebar-footer">
+                        <div className="sidebar-user" onClick={() => navigate('/profile')}>
+                            {user.photoURL ? (
+                                <img src={user.photoURL} alt="Avatar" className="sidebar-avatar" />
+                            ) : (
+                                <div className="sidebar-avatar">{user.displayName?.charAt(0) || 'U'}</div>
+                            )}
+                            <div className="sidebar-user-info">
+                                <div className="sidebar-user-name">{user.displayName || 'User'}</div>
+                                <div className="sidebar-user-email">{user.email}</div>
+                            </div>
+                            <button className="sidebar-icon-btn" onClick={(e) => { e.stopPropagation(); handleLogout(); }} title="Log out" style={{ color: 'var(--danger)' }}>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                            </button>
+                        </div>
                     </div>
-                </div>
+                ) : (
+                    <div className="sidebar-footer">
+                        <div style={{ padding: '8px 12px', fontSize: 12, color: 'var(--text-muted)', textAlign: 'center' }}>
+                            ✦ MyNotion — stored locally
+                        </div>
+                    </div>
+                )}
             </aside>
 
             {/* Context menu */}
