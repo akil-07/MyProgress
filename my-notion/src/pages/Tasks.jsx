@@ -365,11 +365,7 @@ export default function Tasks() {
     const hasDone = tasks.some(t => t.completed)
 
     return (
-        <div style={{
-            maxWidth: 760, margin: '0 auto',
-            padding: '48px 40px 80px',
-            width: '100%',
-        }}>
+        <div className="page-container" style={{ maxWidth: 760 }}>
             {/* Header */}
             <div style={{ marginBottom: 28 }}>
                 <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: -0.5, margin: 0, color: 'var(--text-primary)' }}>

@@ -1,5 +1,5 @@
-import React from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import Sidebar from '../components/Sidebar/Sidebar.jsx'
 import Document from './Document.jsx'
 import Tasks from './Tasks.jsx'
@@ -11,6 +11,12 @@ import usePageStore from '../store/pageStore.js'
 export default function Home() {
     const { pages, createPage } = usePageStore()
     const navigate = useNavigate()
+    const location = useLocation()
+    const [sidebarOpen, setSidebarOpen] = useState(false)
+
+    useEffect(() => {
+        setSidebarOpen(false)
+    }, [location.pathname])
 
     const handleCreateFirstPage = async () => {
         const id = createPage(null)
@@ -18,9 +24,19 @@ export default function Home() {
     }
 
     return (
-        <div className="app-layout">
+        <div className={`app-layout ${sidebarOpen ? 'sidebar-open' : ''}`}>
+            {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
             <Sidebar />
+
             <main className="main-content">
+                <div className="mobile-header">
+                    <button className="mobile-menu-btn" onClick={() => setSidebarOpen(true)}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+                    </button>
+                    <span className="mobile-header-title">My Workspace</span>
+                </div>
+
                 <Routes>
                     <Route path="/" element={<EmptyHome onCreatePage={handleCreateFirstPage} pageCount={pages.length} />} />
                     <Route path="/doc/:pageId" element={<Document />} />
@@ -60,10 +76,9 @@ function EmptyHome({ onCreatePage, pageCount }) {
                 </button>
             )}
 
-            <div style={{
+            <div className="empty-tips-grid" style={{
                 marginTop: 40, display: 'grid',
-                gridTemplateColumns: '1fr 1fr', gap: 12,
-                maxWidth: 380, width: '100%',
+                gap: 12, maxWidth: 380, width: '100%',
             }}>
                 {tips.map(t => (
                     <div key={t.key} style={{

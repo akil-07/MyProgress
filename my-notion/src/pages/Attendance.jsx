@@ -80,7 +80,7 @@ function SubjectCard({ subject, updateSubject, onRemove, getStats, getBudget, ge
                         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: 0.5, marginBottom: 8, textTransform: 'uppercase' }}>
                             Past Attendance
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                        <div className="form-grid-2">
                             <div>
                                 <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontWeight: 600 }}>CONDUCTED</div>
                                 <input type="number" min="0" value={subject.conducted || ''} onChange={e => s('conducted', Number(e.target.value))} placeholder="e.g. 45" style={inputStyle} />
@@ -168,7 +168,7 @@ function SubjectCard({ subject, updateSubject, onRemove, getStats, getBudget, ge
                         if you attend all {stats.futureDays} remaining days ({stats.futureClasses} cls)
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+                    <div className="form-grid-2" style={{ marginBottom: 24 }}>
                         <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: 10, border: '1px solid var(--border)' }}>
                             <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>FINAL CONDUCTED</div>
                             <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{stats.finalConducted}</div>
@@ -277,7 +277,7 @@ export default function Attendance() {
     const { subjects, addSubject, updateSubject, removeSubject, getSubjectStats, getBunkBudget, getRecoverClasses, semester } = useAcademicStore()
 
     return (
-        <div style={{ maxWidth: 840, margin: '0 auto', padding: '48px 40px 80px', width: '100%' }}>
+        <div className="page-container" style={{ maxWidth: 840 }}>
             {/* Header */}
             <div style={{ marginBottom: 24 }}>
                 <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: -0.5, margin: 0, color: 'var(--text-primary)' }}>

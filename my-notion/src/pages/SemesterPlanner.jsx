@@ -57,7 +57,7 @@ function SemesterSetup({ semester, onUpdate }) {
             <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 14, color: 'var(--text-primary)' }}>
                 ⚙️ Semester Setup
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
+            <div className="form-grid-3" style={{ marginBottom: 14 }}>
                 {[
                     { label: 'Semester Name', key: 'name', type: 'text', placeholder: 'e.g. Semester 4' },
                     { label: 'Start Date', key: 'startDate', type: 'date' },
@@ -158,7 +158,7 @@ function AddEventForm({ onAdd, onClose }) {
             boxShadow: 'var(--shadow-md)',
         }}>
             <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 14 }}>📅 Add Event / Exam</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div className="form-grid-2" style={{ marginBottom: 12 }}>
                 <div style={{ gridColumn: '1/-1' }}>
                     <input value={form.title} onChange={e => s('title', e.target.value)} placeholder="Event title…" autoFocus style={inp} />
                 </div>
@@ -305,7 +305,7 @@ export default function SemesterPlanner() {
     const upcoming7 = events.filter(e => { const d = daysLeft(e.date); return d !== null && d >= 0 && d <= 7 })
 
     return (
-        <div style={{ maxWidth: 820, margin: '0 auto', padding: '48px 40px 80px', width: '100%' }}>
+        <div className="page-container" style={{ maxWidth: 820 }}>
             <div style={{ marginBottom: 24 }}>
                 <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: -0.5, margin: 0, color: 'var(--text-primary)' }}>
                     🗓️ Semester Planner

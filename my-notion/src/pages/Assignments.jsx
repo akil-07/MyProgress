@@ -51,7 +51,7 @@ function AddForm({ subjects, onAdd, onClose }) {
             <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 16, color: 'var(--text-primary)' }}>
                 📋 New Assignment
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+            <div className="form-grid-2" style={{ marginBottom: 12 }}>
                 <div style={{ gridColumn: '1/-1' }}>
                     <input value={form.title} onChange={e => set('title', e.target.value)}
                         placeholder="Assignment title…" autoFocus style={inputStyle} />
@@ -208,7 +208,7 @@ export default function Assignments() {
     }).length
 
     return (
-        <div style={{ maxWidth: 760, margin: '0 auto', padding: '48px 40px 80px', width: '100%' }}>
+        <div className="page-container" style={{ maxWidth: 760 }}>
             <div style={{ marginBottom: 24 }}>
                 <h1 style={{ fontSize: 34, fontWeight: 800, letterSpacing: -0.5, margin: 0, color: 'var(--text-primary)' }}>
                     📋 Assignments
