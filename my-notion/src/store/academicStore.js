@@ -75,8 +75,9 @@ const useAcademicStore = create((set, get) => ({
             current.setDate(current.getDate() + 1)
         }
 
-        // Each full day counts as 2 periods
-        const futureClasses = futureDays * 2
+        // Each full day counts as 2 periods, but if subject includes '0.5' or '.5' it counts as 0.5
+        const periodsPerDay = s.name.includes('0.5') || s.name.includes('.5') ? 0.5 : 2
+        const futureClasses = futureDays * periodsPerDay
 
         const conducted = Number(s.conducted) || 0
         const attended = Number(s.attended) || 0
