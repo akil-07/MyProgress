@@ -133,7 +133,7 @@ export async function askGeminiChat(messages) {
         `If the user asks you to check off a task, add a task, create a page, write content parameters while creating a page, or add to an existing page (via editPage) ALWAYS call the corresponding tool/function. Do NOT just say you did it. Actually call the function. After calling a function, confirm the action cleanly with the user.`;
 
     const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash",
+        model: "gemini-1.5-flash",
         systemInstruction,
         tools
     });
@@ -182,14 +182,14 @@ export async function askGeminiChat(messages) {
 // Keeping the older ones intact for the document Slash editor features
 export async function askGemini(prompt) {
     if (!genAI) throw new Error("Gemini API key is missing.");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const result = await model.generateContent(prompt);
     return result.response.text();
 }
 
 export async function continueDocWriting(context) {
     if (!genAI) throw new Error("Gemini API key is missing.");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt = `Given the following document text, continue writing the next paragraph that naturally flows from it. Do not include introductory text, just provide the continuation.\n\nContext:\n${context}`;
     const result = await model.generateContent(prompt);
     return result.response.text();
@@ -197,7 +197,7 @@ export async function continueDocWriting(context) {
 
 export async function summarizeDocText(text) {
     if (!genAI) throw new Error("Gemini API key is missing.");
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt = `Please summarize the following text concisely:\n\n${text}\n\nSummary:`;
     const result = await model.generateContent(prompt);
     return result.response.text();
