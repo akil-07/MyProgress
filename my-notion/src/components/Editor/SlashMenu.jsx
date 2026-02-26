@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { continueDocWriting, summarizeDocText, isGeminiConfigured } from '../../services/gemini.js';
+import { continueDocWriting, summarizeDocText, isGeminiConfigured, askGemini } from '../../services/gemini.js';
 
 const ALL_COMMANDS = [
     {
@@ -20,6 +20,27 @@ const ALL_COMMANDS = [
                         // A rough way to replace the loading text: just undo and insert
                         ed.commands.undo();
                         ed.chain().focus().insertContent('\n\n' + result).run();
+                    } catch (e) {
+                        ed.commands.undo();
+                        alert('Error: ' + e.message);
+                    }
+                }
+            },
+            {
+                icon: '✏️', label: 'Ask AI to Write', desc: 'Give AI a prompt to generate text', keywords: ['ai', 'write', 'prompt', 'generate'],
+                cmd: async (ed) => {
+                    if (!isGeminiConfigured) {
+                        alert("Gemini API key is missing.");
+                        return;
+                    }
+                    const promptText = window.prompt("What would you like the AI to write about?");
+                    if (!promptText) return;
+
+                    ed.chain().focus().insertContent({ type: 'text', marks: [{ type: 'italic' }], text: ' (AI is generating...) ' }).run();
+                    try {
+                        const result = await askGemini(promptText);
+                        ed.commands.undo();
+                        ed.chain().focus().insertContent('\n' + result).run();
                     } catch (e) {
                         ed.commands.undo();
                         alert('Error: ' + e.message);

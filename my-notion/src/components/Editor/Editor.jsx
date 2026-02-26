@@ -9,6 +9,7 @@ import { Underline } from '@tiptap/extension-underline'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import SlashMenu from './SlashMenu.jsx'
+import { isGeminiConfigured, askGemini } from '../../services/gemini.js'
 
 /* ── debounce ─────────────────────────────────────────── */
 function useDebounce(fn, delay) {
@@ -85,6 +86,25 @@ function FloatingToolbar({ editor }) {
             <div className="bubble-toolbar-sep" />
             {btn('H1', editor.isActive('heading', { level: 1 }), () => editor.chain().focus().toggleHeading({ level: 1 }).run())}
             {btn('H2', editor.isActive('heading', { level: 2 }), () => editor.chain().focus().toggleHeading({ level: 2 }).run())}
+            <div className="bubble-toolbar-sep" />
+            <button className="bubble-toolbar-btn" style={{ color: 'var(--accent)' }} title="AI Edit" onMouseDown={async (e) => {
+                e.preventDefault()
+                if (!isGeminiConfigured) {
+                    alert('Gemini API key is missing!')
+                    return
+                }
+                const { from, to } = editor.state.selection
+                if (from === to) return
+                const selectedText = editor.state.doc.textBetween(from, to, '\n')
+                const instruction = window.prompt("How should AI rewrite this text? (e.g., 'Make it shorter', 'Fix grammar')")
+                if (!instruction) return
+                try {
+                    const result = await askGemini(`Rewrite the following text based on this instruction: "${instruction}"\n\nText: ${selectedText}`)
+                    editor.chain().focus().insertContent(result).run()
+                } catch (err) {
+                    alert('Error: ' + err.message)
+                }
+            }}>✨ Edit</button>
         </div>
     )
 }
