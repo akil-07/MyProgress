@@ -41,6 +41,18 @@ const tools = [{
                 },
                 required: ["title"]
             }
+        },
+        {
+            name: "editPage",
+            description: "Add or edit content of an existing page.",
+            parameters: {
+                type: "OBJECT",
+                properties: {
+                    title: { type: "STRING", description: "The title of the page to edit" },
+                    content: { type: "STRING", description: "The content paragraph to add to the page" }
+                },
+                required: ["title", "content"]
+            }
         }
     ]
 }];
@@ -80,6 +92,18 @@ function executeTool(name, args) {
         return { success: true, message: `Added assignment: ${args.title}` };
     }
 
+    if (name === 'editPage') {
+        const state = usePageStore.getState();
+        const foundPage = state.pages.find(p => p.title.toLowerCase().includes(args.title.toLowerCase()));
+        if (foundPage) {
+            const currentContent = foundPage.content || [];
+            const newBlock = { id: crypto.randomUUID(), type: 'p', text: args.content };
+            state.updatePage(foundPage.id, { content: [...currentContent, newBlock] });
+            return { success: true, message: `Added content to page: ${foundPage.title}` };
+        }
+        return { success: false, error: `Could not find an existing page matching: ${args.title}` };
+    }
+
     return { success: false, error: "Unknown tool" };
 }
 
@@ -106,7 +130,7 @@ export async function askGeminiChat(messages) {
         `Active Tasks / To-Do:\n${activeTasks}\n\n` +
         `Pages:\n${allPages}\n\n` +
         `Pending Assignments:\n${assignmentsStr}\n\n` +
-        `If the user asks you to check off a task, add a task, create a page, or add an assignment, ALWAYS call the corresponding tool/function. Do NOT just say you did it. Actually call the function. After calling a function, confirm the action cleanly with the user.`;
+        `If the user asks you to check off a task, add a task, create a page, write content parameters while creating a page, or add to an existing page (via editPage) ALWAYS call the corresponding tool/function. Do NOT just say you did it. Actually call the function. After calling a function, confirm the action cleanly with the user.`;
 
     const model = genAI.getGenerativeModel({
         model: "gemini-2.5-flash",
