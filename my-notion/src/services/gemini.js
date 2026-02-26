@@ -26,7 +26,7 @@ const tools = [{
         {
             name: "createPage",
             description: "Create a new document page in the workspace.",
-            parameters: { type: "OBJECT", properties: { title: { type: "STRING" } }, required: ["title"] }
+            parameters: { type: "OBJECT", properties: { title: { type: "STRING" }, content: { type: "STRING", description: "Optional content paragraph for the page" } }, required: ["title"] }
         },
         {
             name: "addAssignment",
@@ -62,7 +62,12 @@ function executeTool(name, args) {
     if (name === 'createPage') {
         const state = usePageStore.getState();
         const id = state.createPage();
-        state.updatePage(id, { title: args.title });
+        const pageUpdate = { title: args.title };
+        if (args.content) {
+            // MyNotion uses an array of blocks for content
+            pageUpdate.content = [{ id: crypto.randomUUID(), type: 'p', text: args.content }];
+        }
+        state.updatePage(id, pageUpdate);
         return { success: true, message: `Created new page: ${args.title}` };
     }
     if (name === 'addAssignment') {
