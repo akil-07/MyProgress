@@ -97,27 +97,6 @@ function SubjectCard({ subject, updateSubject, onRemove, getStats, getBudget, ge
                         )}
                     </div>
 
-                    {/* Timetable */}
-                    <div>
-                        <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', letterSpacing: 0.5, marginBottom: 8, textTransform: 'uppercase' }}>
-                            Weekly Timetable
-                        </div>
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                            {DAYS.map(d => {
-                                const active = (subject.timetable || []).includes(d.val)
-                                return (
-                                    <button key={d.val} onClick={() => toggleDay(d.val)} style={{
-                                        padding: '8px 12px', borderRadius: 8, fontSize: 13, fontWeight: 600,
-                                        cursor: 'pointer', transition: 'all 0.15s', border: '1.5px solid',
-                                        borderColor: active ? subject.color : 'var(--border)',
-                                        background: active ? subject.color : 'transparent',
-                                        color: active ? '#fff' : 'var(--text-secondary)',
-                                        fontFamily: 'var(--font)', flex: '1 1 40px', textAlign: 'center'
-                                    }}>{d.label}</button>
-                                )
-                            })}
-                        </div>
-                    </div>
 
                     {/* Excluded Dates */}
                     <div>
@@ -271,6 +250,60 @@ function AddSubjectForm({ onAdd }) {
     )
 }
 
+/* ── Today Schedule ─────────────────────────────────────── */
+function TodaySchedule() {
+    const { timetable, subjects, absences, markAbsent, removeAbsent } = useAcademicStore()
+    const todayStr = new Date().toISOString().slice(0, 10)
+    const dayOfWeek = new Date().getDay()
+
+    if (dayOfWeek === 0) return <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary)', borderRadius: 12, border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 600 }}>It's Sunday! Enjoy your day off.</div>
+
+    const todaysSlots = timetable[dayOfWeek] || []
+    const hasClasses = todaysSlots.some((s, idx) => idx !== 2 && s)
+
+    if (!hasClasses) return <div style={{ marginBottom: 24, padding: 16, background: 'var(--bg-secondary)', borderRadius: 12, border: '1px solid var(--border)', color: 'var(--text-muted)', fontWeight: 600 }}>No classes scheduled for today based on your timetable!</div>
+
+    const SLOTS = ['8:00 - 10:00', '10:00 - 12:00', '12:00 - 1:00 (Lunch)', '1:00 - 3:00', '3:00 - 5:00']
+
+    return (
+        <div style={{ marginBottom: 28, background: 'var(--bg-card)', borderRadius: 14, border: '1px solid var(--border)', padding: 24, boxShadow: 'var(--shadow-sm)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                <h3 style={{ margin: 0, fontSize: 18, color: 'var(--text-primary)' }}>📅 Today's Classes</h3>
+                <div style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' })}</div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {todaysSlots.map((subId, idx) => {
+                    if (idx === 2 || !subId) return null;
+                    const subject = subjects.find(s => s.id === subId)
+                    if (!subject) return null;
+
+                    const isAbsent = absences.some(a => a.date === todayStr && a.slot === idx && a.subjectId === subId)
+
+                    return (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--bg-secondary)', borderRadius: 10, border: '1px solid var(--border)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{ fontWeight: 600, color: 'var(--text-muted)', fontSize: 13, width: 100 }}>{SLOTS[idx]}</div>
+                                <div style={{ fontWeight: 700, color: subject.color }}>{subject.name}</div>
+                            </div>
+                            <button
+                                onClick={() => isAbsent ? removeAbsent(todayStr, idx, subId) : markAbsent(todayStr, idx, subId)}
+                                style={{
+                                    padding: '6px 12px', borderRadius: 6, fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'var(--font)', border: 'none',
+                                    background: isAbsent ? '#ef4444' : 'var(--bg-active)',
+                                    color: isAbsent ? '#fff' : 'var(--text-secondary)',
+                                    transition: 'all 0.2s'
+                                }}
+                            >
+                                {isAbsent ? 'Absent (Undo)' : 'Mark Absent'}
+                            </button>
+                        </div>
+                    )
+                })}
+            </div>
+        </div>
+    )
+}
+
 /* ── Page ─────────────────────────────────────────────── */
 export default function Attendance() {
     const navigate = useNavigate()
@@ -288,6 +321,8 @@ export default function Attendance() {
                     Calculated based on your weekly timetable and semester dates.
                 </p>
             </div>
+
+            <TodaySchedule />
 
             {/* Global Semester Info Banner */}
             <div style={{

@@ -49,19 +49,59 @@ const useAcademicStore = create((set, get) => ({
         set({ subjects })
     },
 
+    // ════════════ TIMETABLE ════════════
+    timetable: LS('mynotion_timetable').load() || {
+        1: [null, null, 'lunch', null, null],
+        2: [null, null, 'lunch', null, null],
+        3: [null, null, 'lunch', null, null],
+        4: [null, null, 'lunch', null, null],
+        5: [null, null, 'lunch', null, null],
+        6: [null, null, 'lunch', null, null]
+    },
+    updateTimetableSlot: (day, slot, subjectId) => {
+        const newTimetable = { ...get().timetable }
+        const daySlots = [...newTimetable[day]]
+        daySlots[slot] = subjectId
+        newTimetable[day] = daySlots
+        LS('mynotion_timetable').save(newTimetable)
+        set({ timetable: newTimetable })
+    },
+
+    // ════════════ ABSENCES ════════════
+    absences: LS('mynotion_absences').load() || [], // { id, date, slot, subjectId }
+    markAbsent: (date, slot, subjectId) => {
+        const abs = [...get().absences]
+        if (!abs.find(a => a.date === date && a.slot === slot && a.subjectId === subjectId)) {
+            abs.push({ id: id(), date, slot, subjectId })
+            LS('mynotion_absences').save(abs)
+            set({ absences: abs })
+        }
+    },
+    removeAbsent: (date, slot, subjectId) => {
+        const abs = get().absences.filter(a => !(a.date === date && a.slot === slot && a.subjectId === subjectId))
+        LS('mynotion_absences').save(abs)
+        set({ absences: abs })
+    },
+
     getSubjectStats: (subjectId) => {
         const s = get().subjects.find(s => s.id === subjectId)
         if (!s) return null
 
-        // Calculate future classes from tomorrow until semester end
-        let futureDays = 0
-        let current = new Date()
-        current.setDate(current.getDate() + 1)
-        current.setHours(0, 0, 0, 0)
-
         const sem = get().semester
+        const timetable = get().timetable
+        const absences = get().absences
+
+        let conducted = 0
+        let futureClasses = 0
+        let slotWeight = s.name.includes('0.5') || s.name.includes('.5') ? 0.5 : 2
+
+        let current = sem.startDate ? new Date(sem.startDate) : new Date(todayStr())
+        current.setHours(0, 0, 0, 0)
         let end = sem.endDate ? new Date(sem.endDate) : new Date(todayStr())
         end.setHours(0, 0, 0, 0)
+
+        let today = new Date(todayStr())
+        today.setHours(0, 0, 0, 0)
 
         const globalHolidays = (sem.events || []).filter(e => e.type === 'holiday').map(e => e.date)
         const allExcluded = new Set([...(s.excludedDates || []), ...globalHolidays])
@@ -69,26 +109,43 @@ const useAcademicStore = create((set, get) => ({
         while (current <= end) {
             const dateStr = current.getTime() - (current.getTimezoneOffset() * 60000)
             const ds = new Date(dateStr).toISOString().slice(0, 10)
-            if ((s.timetable || []).includes(current.getDay()) && !allExcluded.has(ds)) {
-                futureDays++
+            const dayOfWeek = current.getDay()
+
+            if (dayOfWeek >= 1 && dayOfWeek <= 6 && !allExcluded.has(ds)) {
+                const slots = timetable[dayOfWeek]
+                for (let i = 0; i < 5; i++) {
+                    if (slots[i] === subjectId) {
+                        if (current <= today) {
+                            conducted += slotWeight
+                        } else {
+                            futureClasses += slotWeight
+                        }
+                    }
+                }
             }
             current.setDate(current.getDate() + 1)
         }
 
-        // Each full day counts as 2 periods, but if subject includes '0.5' or '.5' it counts as 0.5
-        const periodsPerDay = s.name.includes('0.5') || s.name.includes('.5') ? 0.5 : 2
-        const futureClasses = futureDays * periodsPerDay
+        // Add any manually entered baseline from the past (if user migrating)
+        conducted += (Number(s.conducted) || 0)
 
-        const conducted = Number(s.conducted) || 0
-        const attended = Number(s.attended) || 0
+        const subjectAbsences = absences.filter(a => a.subjectId === subjectId).length
+        const totalAbsent = subjectAbsences * slotWeight
+
+        let attended = Math.max(0, conducted - totalAbsent)
+        // Adjust for any manual attended baseline
+        if (s.conducted && s.attended) {
+            const manualMissed = s.conducted - s.attended
+            attended -= Math.max(0, manualMissed)
+        }
+
         const currentPct = conducted === 0 ? 100 : Math.round((attended / conducted) * 100)
-
         const finalConducted = conducted + futureClasses
         const finalAttended = attended + futureClasses
         const projectedPct = finalConducted === 0 ? 100 : Math.round((finalAttended / finalConducted) * 100)
 
         return {
-            currentPct, projectedPct, futureClasses, futureDays,
+            currentPct, projectedPct, futureClasses, futureDays: futureClasses / slotWeight,
             conducted, attended, finalConducted, finalAttended
         }
     },

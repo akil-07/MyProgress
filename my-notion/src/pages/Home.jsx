@@ -7,6 +7,7 @@ import Attendance from './Attendance.jsx'
 import Assignments from './Assignments.jsx'
 import ChatAssistant from '../components/Chat/ChatAssistant.jsx'
 import SemesterPlanner from './SemesterPlanner.jsx'
+import Timetable from './Timetable.jsx'
 import Profile from './Profile.jsx'
 import usePageStore from '../store/pageStore.js'
 
@@ -44,6 +45,7 @@ export default function Home() {
                     <Route path="/doc/:pageId" element={<Document />} />
                     <Route path="/tasks" element={<Tasks />} />
                     <Route path="/attendance" element={<Attendance />} />
+                    <Route path="/timetable" element={<Timetable />} />
                     <Route path="/assignments" element={<Assignments />} />
                     <Route path="/semester" element={<SemesterPlanner />} />
                     <Route path="/profile" element={<Profile />} />
