@@ -93,7 +93,7 @@ const useAcademicStore = create((set, get) => ({
 
         let conducted = 0
         let futureClasses = 0
-        let slotWeight = s.name.includes('0.5') || s.name.includes('.5') ? 0.5 : 2
+        let slotWeight = 1 // Each slot in the timetable counts as exactly 1 class
 
         let current = sem.startDate ? new Date(sem.startDate) : new Date(todayStr())
         current.setHours(0, 0, 0, 0)
