@@ -50,7 +50,6 @@ export default function Home() {
                 </Routes>
             </main>
 
-            <ChatAssistant />
         </div>
     )
 }
