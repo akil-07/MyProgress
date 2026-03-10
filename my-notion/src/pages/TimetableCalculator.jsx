@@ -35,25 +35,18 @@ function formatDate(ds) {
 /**
  * All maths in CLASSES throughout.
  *
- * hoursPerClass : how many hours = 1 class at this university (e.g. 2)
+ * hoursPerClass  : how many hours = 1 class at this university (e.g. 2)
  *
- * Inputs from user are in HOURS:
- *   hoursPerWeek   – hours this subject runs per week (from portal / timetable)
- *   conductedHours – hours conducted so far (from portal)
- *   attendedHours  – hours attended so far (from portal)
- *
- * Derived:
- *   classesPerWeek  = hoursPerWeek   / hoursPerClass
- *   conducted       = conductedHours / hoursPerClass
- *   attended        = attendedHours  / hoursPerClass
+ * classesPerWeek : entered DIRECTLY by user as classes (e.g. 5 classes)
+ * conductedHours : hours shown in MyCamu portal → ÷ hoursPerClass = classes
+ * attendedHours  : hours shown in MyCamu portal → ÷ hoursPerClass = classes
  */
-function calcStats({ hoursPerWeek, conductedHours, attendedHours, hoursPerClass, weeksLeft, target }) {
+function calcStats({ classesPerWeek, conductedHours, attendedHours, hoursPerClass, weeksLeft, target }) {
     const hpc = Math.max(1, hoursPerClass)           // guard div/0
-    const classesPerWeek = hoursPerWeek / hpc
-    const conducted      = conductedHours / hpc
-    const attended       = attendedHours  / hpc
+    const conducted = conductedHours / hpc
+    const attended  = attendedHours  / hpc
 
-    const futureClasses  = Math.round(classesPerWeek * weeksLeft)
+    const futureClasses  = Math.round((classesPerWeek || 0) * (weeksLeft || 0))
     const finalConducted = conducted + futureClasses
     const finalAttended  = attended  + futureClasses   // best-case: attend all
 
@@ -75,7 +68,6 @@ function calcStats({ hoursPerWeek, conductedHours, attendedHours, hoursPerClass,
     }
 
     return {
-        classesPerWeek: +classesPerWeek.toFixed(2),
         conducted: +conducted.toFixed(1),
         attended:  +attended.toFixed(1),
         futureClasses, finalConducted: +finalConducted.toFixed(1),
@@ -87,18 +79,18 @@ function calcStats({ hoursPerWeek, conductedHours, attendedHours, hoursPerClass,
 /* ─── SubjectRow ─────────────────────────────────────────── */
 function SubjectRow({ subject, onChange, onRemove, weeksLeft, hoursPerClass, colorIdx }) {
     const s = subject
-    const hasData = s.hoursPerWeek > 0 || s.conductedHours > 0
+    const hasData = s.classesPerWeek > 0 || s.conductedHours > 0
 
     const stats = calcStats({
-        hoursPerWeek:   s.hoursPerWeek   || 0,
+        classesPerWeek: s.classesPerWeek || 0,
         conductedHours: s.conductedHours || 0,
         attendedHours:  s.attendedHours  || 0,
         hoursPerClass,
         weeksLeft: weeksLeft || 0,
-        target: s.target || 75,
+        target: s.target || 80,
     })
 
-    const isSafe = stats.projectedPct >= (s.target || 75)
+    const isSafe = stats.projectedPct >= (s.target || 80)
     const color  = COLORS[colorIdx % COLORS.length]
 
     const inputSt = {
@@ -139,19 +131,19 @@ function SubjectRow({ subject, onChange, onRemove, weeksLeft, hoursPerClass, col
                     />
                 </div>
 
-                {/* Hours/week  → internally becomes classes/week */}
+                {/* Classes/week — entered directly as classes */}
                 <div style={{ flex: '0 1 110px', minWidth: 90 }}>
                     <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 2 }}>
-                        Hrs / Week
+                        Classes/Week
                     </div>
                     <div style={{ fontSize: 10, color: 'var(--accent)', fontWeight: 600, marginBottom: 4 }}>
-                        = {stats.classesPerWeek} cls/wk
+                        direct count
                     </div>
                     <input
-                        type="number" min="0" max="100" step="1"
-                        value={s.hoursPerWeek === 0 ? '' : s.hoursPerWeek}
-                        onChange={e => onChange({ hoursPerWeek: parseFloat(e.target.value) || 0 })}
-                        placeholder="e.g. 4"
+                        type="number" min="0" max="50" step="1"
+                        value={s.classesPerWeek === 0 ? '' : s.classesPerWeek}
+                        onChange={e => onChange({ classesPerWeek: parseFloat(e.target.value) || 0 })}
+                        placeholder="e.g. 5"
                         style={inputSt}
                     />
                 </div>
@@ -199,7 +191,7 @@ function SubjectRow({ subject, onChange, onRemove, weeksLeft, hoursPerClass, col
                     <input
                         type="number" min="1" max="100"
                         value={s.target}
-                        onChange={e => onChange({ target: clamp(parseInt(e.target.value) || 75, 1, 100) })}
+                        onChange={e => onChange({ target: clamp(parseInt(e.target.value) || 80, 1, 100) })}
                         style={inputSt}
                     />
                 </div>
@@ -283,12 +275,12 @@ function SubjectRow({ subject, onChange, onRemove, weeksLeft, hoursPerClass, col
 
 /* ─── SummaryBar ─────────────────────────────────────────── */
 function SummaryBar({ subjects, weeksLeft, hoursPerClass, currentWeek, totalWeeks }) {
-    const valid = subjects.filter(s => s.hoursPerWeek > 0 || s.conductedHours > 0)
+    const valid = subjects.filter(s => s.classesPerWeek > 0 || s.conductedHours > 0)
     if (valid.length === 0) return null
 
     const safeCount = valid.filter(s => {
-        const st = calcStats({ hoursPerWeek: s.hoursPerWeek || 0, conductedHours: s.conductedHours || 0, attendedHours: s.attendedHours || 0, hoursPerClass, weeksLeft, target: s.target || 75 })
-        return st.projectedPct >= (s.target || 75)
+        const st = calcStats({ classesPerWeek: s.classesPerWeek || 0, conductedHours: s.conductedHours || 0, attendedHours: s.attendedHours || 0, hoursPerClass, weeksLeft, target: s.target || 80 })
+        return st.projectedPct >= (s.target || 80)
     }).length
     const dangerCount = valid.length - safeCount
 
@@ -319,8 +311,8 @@ function SummaryBar({ subjects, weeksLeft, hoursPerClass, currentWeek, totalWeek
 /* ─── Page ───────────────────────────────────────────────── */
 const DEFAULT_SUBJECT = () => ({
     id: uid(), name: '',
-    hoursPerWeek: 0, conductedHours: 0, attendedHours: 0,
-    target: 75,
+    classesPerWeek: 0, conductedHours: 0, attendedHours: 0,
+    target: 80,
 })
 
 export default function TimetableCalculator() {
@@ -359,8 +351,8 @@ export default function TimetableCalculator() {
                     🗓️ Timetable Calculator
                 </h1>
                 <p style={{ fontSize: 14, color: 'var(--text-muted)', marginTop: 8, lineHeight: 1.6 }}>
-                    Enter hours from your university portal — the calculator converts to <b>classes</b> automatically.
-                    Weeks are auto-synced from your Semester Planner.
+                    Enter <b>how many classes</b> each subject has per week, then paste <b>conducted &amp; attended hours</b> directly
+                    from MyCamu — the calculator converts hours → classes automatically. Weeks are auto-synced from your Semester Planner.
                 </p>
             </div>
 
@@ -450,7 +442,7 @@ export default function TimetableCalculator() {
                 color: 'var(--text-muted)', fontSize: 10, fontWeight: 700, letterSpacing: 0.5, textTransform: 'uppercase',
             }}>
                 <span style={{ flex: '1 1 120px' }}>Subject</span>
-                <span style={{ flex: '0 1 110px' }}>Hrs/Week</span>
+                <span style={{ flex: '0 1 110px' }}>Classes/Week</span>
                 <span style={{ flex: '0 1 120px' }}>Hrs Conducted</span>
                 <span style={{ flex: '0 1 120px' }}>Hrs Attended</span>
                 <span style={{ flex: '0 1 80px' }}>Target %</span>
@@ -495,10 +487,10 @@ export default function TimetableCalculator() {
             {/* How it works */}
             <div style={{ marginTop: 32, padding: '16px 20px', borderRadius: 12, background: 'var(--bg-secondary)', border: '1px solid var(--border)', fontSize: 13, color: 'var(--text-muted)', lineHeight: 1.75 }}>
                 <b style={{ color: 'var(--text-primary)' }}>💡 How it works</b><br />
-                Your university portal shows data in <b>hours</b> — enter those numbers directly here.
-                With <b>{hoursPerClass} hrs = 1 class</b> set above, the calculator automatically converts everything to <b>classes</b> for accurate attendance calculations.
+                <b>Classes/Week</b> → enter the actual number of classes (e.g. 5 — no conversion needed).<br />
+                <b>Hrs Conducted &amp; Hrs Attended</b> → paste directly from MyCamu in hours. With <b>{hoursPerClass} hrs = 1 class</b>, the calculator divides automatically.
                 <br />
-                <span style={{ opacity: 0.7 }}>Example: 4 hrs/week ÷ {hoursPerClass} = {+(4 / hoursPerClass).toFixed(2)} class{4 / hoursPerClass !== 1 ? 'es' : ''}/week · 20 hrs conducted ÷ {hoursPerClass} = {+(20 / hoursPerClass).toFixed(1)} classes</span>
+                <span style={{ opacity: 0.7 }}>Example: 5 classes/week · 20 hrs conducted ÷ {hoursPerClass} = {+(20 / hoursPerClass).toFixed(1)} classes · 14 hrs attended ÷ {hoursPerClass} = {+(14 / hoursPerClass).toFixed(1)} classes</span>
             </div>
         </div>
     )
