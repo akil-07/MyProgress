@@ -140,3 +140,19 @@ export async function askCerebrasStream(messages, onChunk, signal) {
 
     return full
 }
+
+/* ── Document Writer functions (for Editor slash commands) ── */
+export async function askCerebrasRaw(prompt) {
+    if (!API_KEY) throw new Error("Cerebras API key is missing.");
+    return askCerebras([{ role: 'user', content: prompt }]);
+}
+
+export async function continueDocWriting(context) {
+    const prompt = `Given the following document text, continue writing the next paragraph that naturally flows from it. Do not include introductory text, just provide the continuation.\n\nContext:\n${context}`;
+    return askCerebrasRaw(prompt);
+}
+
+export async function summarizeDocText(text) {
+    const prompt = `Please summarize the following text concisely:\n\n${text}\n\nSummary:`;
+    return askCerebrasRaw(prompt);
+}

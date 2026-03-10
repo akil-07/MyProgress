@@ -9,7 +9,7 @@ import { Underline } from '@tiptap/extension-underline'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { Color } from '@tiptap/extension-color'
 import SlashMenu from './SlashMenu.jsx'
-import { isGeminiConfigured, askGemini } from '../../services/gemini.js'
+import { isCerebrasConfigured, askCerebrasRaw } from '../../services/cerebras.js'
 
 /* ── debounce ─────────────────────────────────────────── */
 function useDebounce(fn, delay) {
@@ -89,8 +89,8 @@ function FloatingToolbar({ editor }) {
             <div className="bubble-toolbar-sep" />
             <button className="bubble-toolbar-btn" style={{ color: 'var(--accent)' }} title="AI Edit" onMouseDown={async (e) => {
                 e.preventDefault()
-                if (!isGeminiConfigured) {
-                    alert('Gemini API key is missing!')
+                if (!isCerebrasConfigured) {
+                    alert('Cerebras API key is missing!')
                     return
                 }
                 const { from, to } = editor.state.selection
@@ -99,7 +99,7 @@ function FloatingToolbar({ editor }) {
                 const instruction = window.prompt("How should AI rewrite this text? (e.g., 'Make it shorter', 'Fix grammar')")
                 if (!instruction) return
                 try {
-                    const result = await askGemini(`Rewrite the following text based on this instruction: "${instruction}"\n\nText: ${selectedText}`)
+                    const result = await askCerebrasRaw(`Rewrite the following text based on this instruction: "${instruction}"\n\nText: ${selectedText}`)
                     editor.chain().focus().insertContent(result).run()
                 } catch (err) {
                     alert('Error: ' + err.message)

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { continueDocWriting, summarizeDocText, isGeminiConfigured, askGemini } from '../../services/gemini.js';
+import { continueDocWriting, summarizeDocText, isCerebrasConfigured, askCerebrasRaw } from '../../services/cerebras.js';
 
 const ALL_COMMANDS = [
     {
@@ -8,8 +8,8 @@ const ALL_COMMANDS = [
             {
                 icon: '✍️', label: 'Continue Writing', desc: 'AI writes the next paragraph', keywords: ['ai', 'continue', 'write'],
                 cmd: async (ed) => {
-                    if (!isGeminiConfigured) {
-                        alert("Gemini API key is missing. Add VITE_GEMINI_API_KEY to your .env file.");
+                    if (!isCerebrasConfigured) {
+                        alert("Cerebras API key is missing. Add VITE_CEREBRAS_API_KEY to your .env file.");
                         return;
                     }
                     // Insert loading state
@@ -29,8 +29,8 @@ const ALL_COMMANDS = [
             {
                 icon: '✏️', label: 'Ask AI to Write', desc: 'Give AI a prompt to generate text', keywords: ['ai', 'write', 'prompt', 'generate'],
                 cmd: async (ed) => {
-                    if (!isGeminiConfigured) {
-                        alert("Gemini API key is missing.");
+                    if (!isCerebrasConfigured) {
+                        alert("Cerebras API key is missing.");
                         return;
                     }
                     const promptText = window.prompt("What would you like the AI to write about?");
@@ -38,7 +38,7 @@ const ALL_COMMANDS = [
 
                     ed.chain().focus().insertContent({ type: 'text', marks: [{ type: 'italic' }], text: ' (AI is generating...) ' }).run();
                     try {
-                        const result = await askGemini(promptText);
+                        const result = await askCerebrasRaw(promptText);
                         ed.commands.undo();
                         ed.chain().focus().insertContent('\n' + result).run();
                     } catch (e) {
@@ -50,8 +50,8 @@ const ALL_COMMANDS = [
             {
                 icon: '📑', label: 'Summarize', desc: 'AI summarizes the document', keywords: ['ai', 'summarize', 'summary'],
                 cmd: async (ed) => {
-                    if (!isGeminiConfigured) {
-                        alert("Gemini API key is missing. Add VITE_GEMINI_API_KEY to your .env file.");
+                    if (!isCerebrasConfigured) {
+                        alert("Cerebras API key is missing. Add VITE_CEREBRAS_API_KEY to your .env file.");
                         return;
                     }
                     ed.chain().focus().insertContent({ type: 'text', marks: [{ type: 'italic' }], text: ' (AI is summarizing...) ' }).run();
