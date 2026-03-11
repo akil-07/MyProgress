@@ -9,7 +9,7 @@ const COLORS = [
     '#8b5cf6', '#06b6d4',
 ]
 
-/* ─── Helpers ────────────────────────────────────────────── */
+/* ─── Helpers ────────────────────────────────────────────── x*/
 function uid() { return Math.random().toString(36).slice(2, 10) }
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)) }
 
@@ -44,15 +44,15 @@ function formatDate(ds) {
 function calcStats({ classesPerWeek, conductedHours, attendedHours, hoursPerClass, weeksLeft, target }) {
     const hpc = Math.max(1, hoursPerClass)           // guard div/0
     const conducted = conductedHours / hpc
-    const attended  = attendedHours  / hpc
+    const attended = attendedHours / hpc
 
-    const futureClasses  = Math.round((classesPerWeek || 0) * (weeksLeft || 0))
+    const futureClasses = Math.round((classesPerWeek || 0) * (weeksLeft || 0))
     const finalConducted = conducted + futureClasses
-    const finalAttended  = attended  + futureClasses   // best-case: attend all
+    const finalAttended = attended + futureClasses   // best-case: attend all
 
     const projectedPct = finalConducted > 0
         ? Math.round((finalAttended / finalConducted) * 100) : 0
-    const currentPct   = conducted > 0
+    const currentPct = conducted > 0
         ? Math.round((attended / conducted) * 100) : 0
 
     // bunk budget
@@ -63,15 +63,15 @@ function calcStats({ classesPerWeek, conductedHours, attendedHours, hoursPerClas
     if (projectedPct < target) {
         const t = target / 100
         const deficit = t * finalConducted - finalAttended
-        const denom   = 1 - t
+        const denom = 1 - t
         recover = denom <= 0 ? Infinity : Math.ceil(deficit / denom)
     }
 
     return {
         conducted: +conducted.toFixed(1),
-        attended:  +attended.toFixed(1),
+        attended: +attended.toFixed(1),
         futureClasses, finalConducted: +finalConducted.toFixed(1),
-        finalAttended:  +finalAttended.toFixed(1),
+        finalAttended: +finalAttended.toFixed(1),
         projectedPct, currentPct, budget, recover,
     }
 }
@@ -84,14 +84,14 @@ function SubjectRow({ subject, onChange, onRemove, weeksLeft, hoursPerClass, col
     const stats = calcStats({
         classesPerWeek: s.classesPerWeek || 0,
         conductedHours: s.conductedHours || 0,
-        attendedHours:  s.attendedHours  || 0,
+        attendedHours: s.attendedHours || 0,
         hoursPerClass,
         weeksLeft: weeksLeft || 0,
         target: s.target || 80,
     })
 
     const isSafe = stats.projectedPct >= (s.target || 80)
-    const color  = COLORS[colorIdx % COLORS.length]
+    const color = COLORS[colorIdx % COLORS.length]
 
     const inputSt = {
         padding: '8px 12px', borderRadius: 8,
@@ -328,7 +328,7 @@ export default function TimetableCalculator() {
         [semester.startDate, semester.endDate]
     )
 
-    const addSubject   = () => setSubjects(prev => [...prev, DEFAULT_SUBJECT()])
+    const addSubject = () => setSubjects(prev => [...prev, DEFAULT_SUBJECT()])
     const updateSubject = useCallback((id, patch) => setSubjects(prev => prev.map(s => s.id === id ? { ...s, ...patch } : s)), [])
     const removeSubject = useCallback((id) => setSubjects(prev => prev.filter(s => s.id !== id)), [])
     const resetAll = () => { if (window.confirm('Clear all subjects?')) setSubjects([DEFAULT_SUBJECT()]) }

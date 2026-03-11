@@ -264,19 +264,27 @@ export async function askCerebrasStream(messages, onChunk, signal) {
         
         let loopContent = ''
         let toolCallsAcc = {}
+        let buffer = ''
 
         while (true) {
             const { done, value } = await reader.read()
             if (done) break
 
-            const chunk = decoder.decode(value, { stream: true })
-            const lines = chunk.split('\n').filter(l => l.startsWith('data: '))
+            buffer += decoder.decode(value, { stream: true })
+            const lines = buffer.split('\n')
+            
+            // Keep the last partial line in the buffer
+            buffer = lines.pop() || ''
 
-            for (const line of lines) {
-                const text = line.slice(6).trim()
-                if (text === '[DONE]') continue
+            for (const rawLine of lines) {
+                const text = rawLine.trim()
+                if (!text.startsWith('data: ')) continue
+                
+                const data = text.slice(6).trim()
+                if (data === '[DONE]') continue
+                
                 try {
-                    const json = JSON.parse(text)
+                    const json = JSON.parse(data)
                     const delta = json.choices?.[0]?.delta
 
                     if (delta?.content) {
