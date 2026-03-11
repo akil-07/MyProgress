@@ -300,25 +300,50 @@ export async function askCerebrasStream(messages, onChunk, signal) {
         }
 
         const callsArray = Object.values(toolCallsAcc)
-        if (callsArray.length > 0) {
+        
+        // Handle models that output raw JSON in content instead of tool_calls array
+        let rawToolCall = null;
+        try {
+            const text = loopContent.trim();
+            if (text.startsWith('{') && text.includes('"function"') && text.includes('"name"')) {
+                const parsed = JSON.parse(text);
+                if (parsed.type === 'function' && parsed.name) {
+                    rawToolCall = parsed;
+                }
+            }
+        } catch (e) {}
+
+        if (callsArray.length > 0 || rawToolCall) {
+            // Erase the raw JSON from the UI if the model leaked it
+            if (rawToolCall && totalContent.endsWith(loopContent)) {
+                totalContent = totalContent.slice(0, totalContent.length - loopContent.length);
+                onChunk(totalContent);
+            }
+
+            const toolCallsMsgArray = rawToolCall 
+                ? [{ id: "call_" + Date.now(), type: 'function', function: { name: rawToolCall.name, arguments: JSON.stringify(rawToolCall.arguments || {}) } }]
+                : callsArray.map(c => ({ id: c.id, type: 'function', function: { name: c.name, arguments: c.arguments } }))
+
             currentMessages.push({
                 role: 'assistant',
-                content: loopContent || null,
-                tool_calls: callsArray.map(c => ({ id: c.id, type: 'function', function: { name: c.name, arguments: c.arguments } }))
+                content: (rawToolCall ? null : loopContent) || null,
+                tool_calls: toolCallsMsgArray
             })
 
-            for (const call of callsArray) {
+            for (const tc of toolCallsMsgArray) {
                 let args = {}
-                try { args = JSON.parse(call.arguments) } catch (e) {}
-                console.log("Cerebras Tool Called:", call.name, args)
-                const result = executeTool(call.name, args)
+                try { args = JSON.parse(tc.function.arguments) } catch (e) {}
+                console.log("Cerebras Tool Called:", tc.function.name, args)
+                const result = executeTool(tc.function.name, args)
+                
                 currentMessages.push({
                     role: 'tool',
-                    tool_call_id: call.id,
-                    name: call.name,
+                    tool_call_id: tc.id,
+                    name: tc.function.name,
                     content: JSON.stringify(result)
                 })
             }
+
             continue
         } else {
             return totalContent
