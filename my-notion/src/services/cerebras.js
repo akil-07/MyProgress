@@ -178,8 +178,8 @@ CRITICAL GUIDELINES:
 async function fetchWithRetry(url, options, maxRetries = 2) {
     for (let i = 0; i < maxRetries; i++) {
         const res = await fetch(url, options)
-        if (res.status === 429) {
-            console.warn(`Cerebras API 429 Rate Limit. Retrying in ${1000 * (i + 1)}ms...`)
+        if (res.status === 429 || res.status === 503) {
+            console.warn(`Cerebras API ${res.status} Rate Limit/High Traffic. Retrying in ${1000 * (i + 1)}ms...`)
             await new Promise(r => setTimeout(r, 1000 * (i + 1)))
             continue
         }
@@ -212,7 +212,7 @@ export async function askCerebras(messages) {
 
     if (!res.ok) {
         const errText = await res.text()
-        if (res.status === 429) {
+        if (res.status === 429 || res.status === 503) {
             throw new Error(`The free Cerebras API is currently overloaded with traffic (Queue Exceeded). Please wait a few seconds and try again!`)
         }
         throw new Error(`Cerebras API error ${res.status}: ${errText}`)
@@ -253,7 +253,7 @@ export async function askCerebrasStream(messages, onChunk, signal) {
 
         if (!res.ok) {
             const errText = await res.text()
-            if (res.status === 429) {
+            if (res.status === 429 || res.status === 503) {
                 throw new Error(`The free Cerebras API is currently overloaded with traffic (Queue Exceeded). Please wait a few seconds and try again!`)
             }
             throw new Error(`Cerebras API error ${res.status}: ${errText}`)
