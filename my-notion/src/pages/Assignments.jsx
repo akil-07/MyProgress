@@ -124,7 +124,7 @@ function AssignmentCard({ a, onUpdate, onDelete }) {
                     {/* Title + badges */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
                         <span style={{
-                            fontSize: 15, fontWeight: 600, color: 'var(--text-primary)',
+                            fontSize: 15, fontWeight: 600,
                             textDecoration: a.status === 'submitted' ? 'line-through' : 'none',
                             color: a.status === 'submitted' ? 'var(--text-muted)' : 'var(--text-primary)',
                         }}>{a.title}</span>

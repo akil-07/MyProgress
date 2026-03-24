@@ -91,61 +91,64 @@ const useAcademicStore = create((set, get) => ({
         const timetable = get().timetable
         const absences = get().absences
 
-        let conducted = 0
-        let futureClasses = 0
-        let slotWeight = 1 // Each slot in the timetable counts as exactly 1 class
+        // Calculate classes per week from timetable
+        let weeklyClasses = 0
+        Object.values(timetable).forEach(daySlots => {
+            daySlots.forEach(slotSubId => {
+                if (slotSubId === subjectId) weeklyClasses++
+            })
+        })
 
-        let current = sem.startDate ? new Date(sem.startDate) : new Date(todayStr())
-        current.setHours(0, 0, 0, 0)
-        let end = sem.endDate ? new Date(sem.endDate) : new Date(todayStr())
-        end.setHours(0, 0, 0, 0)
+        // Calculate weeks left
+        const today = new Date(); today.setHours(0, 0, 0, 0)
+        let weeksLeft = 0
+        if (sem.endDate) {
+            const end = new Date(sem.endDate); end.setHours(0, 0, 0, 0)
+            const W = 7 * 24 * 60 * 60 * 1000
+            const msLeft = end - today
+            weeksLeft = msLeft <= 0 ? 0 : Math.ceil(msLeft / W)
+        }
 
-        let today = new Date(todayStr())
-        today.setHours(0, 0, 0, 0)
+        // Current status (from manual input or timetable past)
+        let conducted = Number(s.conducted) || 0
+        let attended = Number(s.attended) || 0
 
-        const globalHolidays = (sem.events || []).filter(e => e.type === 'holiday').map(e => e.date)
-        const allExcluded = new Set([...(s.excludedDates || []), ...globalHolidays])
+        // If no manual input, fallback to timetable logic for past
+        if (conducted === 0) {
+            let current = sem.startDate ? new Date(sem.startDate) : new Date(todayStr())
+            current.setHours(0, 0, 0, 0)
+            const globalHolidays = (sem.events || []).filter(e => e.type === 'holiday').map(e => e.date)
+            const allExcluded = new Set([...(s.excludedDates || []), ...globalHolidays])
 
-        while (current <= end) {
-            const dateStr = current.getTime() - (current.getTimezoneOffset() * 60000)
-            const ds = new Date(dateStr).toISOString().slice(0, 10)
-            const dayOfWeek = current.getDay()
+            while (current <= today) {
+                const dateStr = current.getTime() - (current.getTimezoneOffset() * 60000)
+                const ds = new Date(dateStr).toISOString().slice(0, 10)
+                const dayOfWeek = current.getDay()
 
-            if (dayOfWeek >= 1 && dayOfWeek <= 6 && !allExcluded.has(ds)) {
-                const slots = timetable[dayOfWeek]
-                for (let i = 0; i < 5; i++) {
-                    if (slots[i] === subjectId) {
-                        if (current <= today) {
-                            conducted += slotWeight
-                        } else {
-                            futureClasses += slotWeight
-                        }
-                    }
+                if (dayOfWeek >= 1 && dayOfWeek <= 6 && !allExcluded.has(ds)) {
+                    const slots = timetable[dayOfWeek] || []
+                    slots.forEach(slotSubId => {
+                        if (slotSubId === subjectId) conducted++
+                    })
                 }
+                current.setDate(current.getDate() + 1)
             }
-            current.setDate(current.getDate() + 1)
+            // Estimate attended as conducted - total absences recorded so far
+            const subjectAbsences = absences.filter(a => a.subjectId === subjectId).length
+            attended = Math.max(0, conducted - subjectAbsences)
         }
 
-        // Add any manually entered baseline from the past (if user migrating)
-        conducted += (Number(s.conducted) || 0)
-
-        const subjectAbsences = absences.filter(a => a.subjectId === subjectId).length
-        const totalAbsent = subjectAbsences * slotWeight
-
-        let attended = Math.max(0, conducted - totalAbsent)
-        // Adjust for any manual attended baseline
-        if (s.conducted && s.attended) {
-            const manualMissed = s.conducted - s.attended
-            attended -= Math.max(0, manualMissed)
-        }
+        // Projection: weekly formula
+        const futureClasses = weeklyClasses * weeksLeft
+        const finalConducted = conducted + futureClasses
+        const finalAttended = attended + futureClasses // best case: attend all future
 
         const currentPct = conducted === 0 ? 100 : Math.round((attended / conducted) * 100)
-        const finalConducted = conducted + futureClasses
-        const finalAttended = attended + futureClasses
         const projectedPct = finalConducted === 0 ? 100 : Math.round((finalAttended / finalConducted) * 100)
 
         return {
-            currentPct, projectedPct, futureClasses, futureDays: futureClasses / slotWeight,
+            currentPct, projectedPct, futureClasses,
+            weeklyClasses, weeksLeft,
             conducted, attended, finalConducted, finalAttended
         }
     },

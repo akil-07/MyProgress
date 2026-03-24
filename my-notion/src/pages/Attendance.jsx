@@ -144,17 +144,25 @@ function SubjectCard({ subject, updateSubject, onRemove, getStats, getBudget, ge
                         </span>
                     </div>
                     <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24, fontWeight: 500 }}>
-                        if you attend all {stats.futureDays} remaining days ({stats.futureClasses} cls)
+                        if you attend all <b>{stats.weeksLeft}</b> remaining weeks ({stats.futureClasses} cls)
                     </div>
 
-                    <div className="form-grid-2" style={{ marginBottom: 24 }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
                         <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: 10, border: '1px solid var(--border)' }}>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>FINAL CONDUCTED</div>
-                            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{stats.finalConducted}</div>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>Classes/Week</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent)' }}>{stats.weeklyClasses}</div>
                         </div>
                         <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: 10, border: '1px solid var(--border)' }}>
-                            <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 600, marginBottom: 4 }}>FINAL ATTENDED</div>
-                            <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-primary)' }}>{stats.finalAttended}</div>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>Weeks Left</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--accent)' }}>{stats.weeksLeft}</div>
+                        </div>
+                        <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: 10, border: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>Final Conducted</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{stats.finalConducted}</div>
+                        </div>
+                        <div style={{ background: 'var(--bg-card)', padding: '12px', borderRadius: 10, border: '1px solid var(--border)' }}>
+                            <div style={{ fontSize: 10, color: 'var(--text-muted)', fontWeight: 700, marginBottom: 4, textTransform: 'uppercase' }}>Final Attended</div>
+                            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>{stats.finalAttended}</div>
                         </div>
                     </div>
 
