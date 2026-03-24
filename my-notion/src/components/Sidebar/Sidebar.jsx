@@ -91,6 +91,10 @@ export default function Sidebar() {
                             <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 99, padding: '1px 7px', minWidth: 18, textAlign: 'center' }}>{pendingTasks}</span>
                         )}
                     </button>
+                    <button className="sidebar-nav-item" onClick={() => navigate('/pomodoro')}>
+                        <span style={{ width: 15, display: 'inline-flex', justifyContent: 'center', fontSize: 15 }}>🐼</span>
+                        <span>Pandaroma Focus</span>
+                    </button>
                 </nav>
 
                 {/* Academic Section */}

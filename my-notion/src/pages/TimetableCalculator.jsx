@@ -317,10 +317,8 @@ const DEFAULT_SUBJECT = () => ({
 
 export default function TimetableCalculator() {
     const navigate = useNavigate()
-    const { semester } = useAcademicStore()
+    const { semester, hoursPerClass, setHoursPerClass } = useAcademicStore()
 
-    // Global: how many hours = 1 class at this university
-    const [hoursPerClass, setHoursPerClass] = useState(2)
     const [subjects, setSubjects] = useState([DEFAULT_SUBJECT()])
 
     const { totalWeeks, currentWeek, weeksLeft } = useMemo(

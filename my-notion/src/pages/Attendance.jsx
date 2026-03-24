@@ -82,12 +82,14 @@ function SubjectCard({ subject, updateSubject, onRemove, getStats, getBudget, ge
                         </div>
                         <div className="form-grid-2">
                             <div>
-                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontWeight: 600 }}>CONDUCTED</div>
-                                <input type="number" min="0" value={subject.conducted || ''} onChange={e => s('conducted', Number(e.target.value))} placeholder="e.g. 45" style={inputStyle} />
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontWeight: 600 }}>CONDUCTED (HRS)</div>
+                                <input type="number" min="0" value={subject.conducted || ''} onChange={e => s('conducted', Number(e.target.value))} placeholder="e.g. 80" style={inputStyle} />
+                                <div style={{ fontSize: 10, color: 'var(--accent)', marginTop: 4, fontWeight: 600 }}>= {(subject.conducted / stats.hpc).toFixed(1)} classes</div>
                             </div>
                             <div>
-                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontWeight: 600 }}>ATTENDED</div>
-                                <input type="number" min="0" max={subject.conducted || Number.MAX_SAFE_INTEGER} value={subject.attended || ''} onChange={e => s('attended', Number(e.target.value))} placeholder="e.g. 35" style={inputStyle} />
+                                <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginBottom: 4, fontWeight: 600 }}>ATTENDED (HRS)</div>
+                                <input type="number" min="0" max={subject.conducted || Number.MAX_SAFE_INTEGER} value={subject.attended || ''} onChange={e => s('attended', Number(e.target.value))} placeholder="e.g. 60" style={inputStyle} />
+                                <div style={{ fontSize: 10, color: 'var(--accent)', marginTop: 4, fontWeight: 600 }}>= {(subject.attended / stats.hpc).toFixed(1)} classes</div>
                             </div>
                         </div>
                         {stats.conducted > 0 && (
@@ -315,7 +317,7 @@ function TodaySchedule() {
 /* ── Page ─────────────────────────────────────────────── */
 export default function Attendance() {
     const navigate = useNavigate()
-    const { subjects, addSubject, updateSubject, removeSubject, getSubjectStats, getBunkBudget, getRecoverClasses, semester } = useAcademicStore()
+    const { subjects, addSubject, updateSubject, removeSubject, getSubjectStats, getBunkBudget, getRecoverClasses, semester, hoursPerClass, setHoursPerClass } = useAcademicStore()
 
     return (
         <div className="page-container" style={{ maxWidth: 840 }}>
@@ -328,6 +330,38 @@ export default function Attendance() {
                     Predict your final attendance before the semester ends! <br />
                     Calculated based on your weekly timetable and semester dates.
                 </p>
+            </div>
+
+            {/* Global Settings: Hours Per Class */}
+            <div style={{
+                display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+                background: 'var(--bg-secondary)', border: '1px solid var(--border)',
+                borderRadius: 14, padding: '14px 22px', marginBottom: 28,
+            }}>
+                <div style={{ fontSize: 20 }}>⚙️</div>
+                <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text-primary)' }}>University Class Duration</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
+                        How many hours = 1 class at your university (e.g. 2 hrs = 1 class)
+                    </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <button onClick={() => updateSubject(subjects[0]?.id, {})} style={{ display: 'none' }}></button> {/* trigger re-render hack if needed, but Zustand handles it */}
+                    <button onClick={() => { const h = Math.max(1, hoursPerClass - 1); setHoursPerClass(h) }} style={{ width: 30, height: 30, borderRadius: 6, border: '2px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 18, cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                    <input
+                        type="number" min="1" max="6"
+                        value={hoursPerClass}
+                        onChange={e => setHoursPerClass(Math.max(1, parseInt(e.target.value) || 1))}
+                        style={{
+                            padding: '8px 12px', borderRadius: 8, border: '2px solid var(--border)',
+                            background: 'var(--bg-card)', color: 'var(--text-primary)',
+                            fontSize: 15, outline: 'none', fontFamily: 'var(--font)', fontWeight: 700,
+                            width: 56, textAlign: 'center',
+                        }}
+                    />
+                    <button onClick={() => { const h = Math.min(6, hoursPerClass + 1); setHoursPerClass(h) }} style={{ width: 30, height: 30, borderRadius: 6, border: '2px solid var(--border)', background: 'var(--bg-card)', color: 'var(--text-primary)', fontSize: 18, cursor: 'pointer', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                    <span style={{ fontSize: 13, color: 'var(--text-muted)', fontWeight: 600 }}>hrs / class</span>
+                </div>
             </div>
 
             <TodaySchedule />

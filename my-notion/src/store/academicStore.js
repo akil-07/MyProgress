@@ -83,6 +83,13 @@ const useAcademicStore = create((set, get) => ({
         set({ absences: abs })
     },
 
+    // ════════════ CONFIG ════════════
+    hoursPerClass: LS('mynotion_hpc').load() || 2,
+    setHoursPerClass: (h) => {
+        LS('mynotion_hpc').save(h)
+        set({ hoursPerClass: h })
+    },
+
     getSubjectStats: (subjectId) => {
         const s = get().subjects.find(s => s.id === subjectId)
         if (!s) return null
@@ -90,66 +97,70 @@ const useAcademicStore = create((set, get) => ({
         const sem = get().semester
         const timetable = get().timetable
         const absences = get().absences
+        const hpc = get().hoursPerClass || 1
 
-        // Calculate classes per week from timetable
-        let weeklyClasses = 0
-        Object.values(timetable).forEach(daySlots => {
-            daySlots.forEach(slotSubId => {
-                if (slotSubId === subjectId) weeklyClasses++
-            })
-        })
+        // Calculate counts
+        let conducted = (Number(s.conducted) || 0) / hpc
+        let attended = (Number(s.attended) || 0) / hpc
+        let futureClasses = 0
 
-        // Calculate weeks left
         const today = new Date(); today.setHours(0, 0, 0, 0)
-        let weeksLeft = 0
-        if (sem.endDate) {
-            const end = new Date(sem.endDate); end.setHours(0, 0, 0, 0)
-            const W = 7 * 24 * 60 * 60 * 1000
-            const msLeft = end - today
-            weeksLeft = msLeft <= 0 ? 0 : Math.ceil(msLeft / W)
+        let end = sem.endDate ? new Date(sem.endDate) : new Date(today)
+        end.setHours(0, 0, 0, 0)
+
+        // Count future classes precisely from the calendar
+        let curr = new Date(today); curr.setDate(curr.getDate() + 1)
+        const globalHolidays = (sem.events || []).filter(e => e.type === 'holiday').map(e => e.date)
+        const allExcluded = new Set([...(s.excludedDates || []), ...globalHolidays])
+
+        while (curr <= end) {
+            const ds = curr.toISOString().slice(0, 10)
+            const dayOfWeek = curr.getDay()
+            if (dayOfWeek >= 1 && dayOfWeek <= 6 && !allExcluded.has(ds)) {
+                const slots = timetable[dayOfWeek] || []
+                slots.forEach(subId => { if (subId === subjectId) futureClasses++ })
+            }
+            curr.setDate(curr.getDate() + 1)
         }
 
-        // Current status (from manual input or timetable past)
-        let conducted = Number(s.conducted) || 0
-        let attended = Number(s.attended) || 0
-
-        // If no manual input, fallback to timetable logic for past
+        // If no manual input, calculate past from timetable
         if (conducted === 0) {
-            let current = sem.startDate ? new Date(sem.startDate) : new Date(todayStr())
-            current.setHours(0, 0, 0, 0)
-            const globalHolidays = (sem.events || []).filter(e => e.type === 'holiday').map(e => e.date)
-            const allExcluded = new Set([...(s.excludedDates || []), ...globalHolidays])
-
-            while (current <= today) {
-                const dateStr = current.getTime() - (current.getTimezoneOffset() * 60000)
-                const ds = new Date(dateStr).toISOString().slice(0, 10)
-                const dayOfWeek = current.getDay()
-
+            let pcurr = sem.startDate ? new Date(sem.startDate) : new Date(today)
+            pcurr.setHours(0, 0, 0, 0)
+            while (pcurr <= today) {
+                const ds = pcurr.toISOString().slice(0, 10)
+                const dayOfWeek = pcurr.getDay()
                 if (dayOfWeek >= 1 && dayOfWeek <= 6 && !allExcluded.has(ds)) {
                     const slots = timetable[dayOfWeek] || []
-                    slots.forEach(slotSubId => {
-                        if (slotSubId === subjectId) conducted++
-                    })
+                    slots.forEach(subId => { if (subId === subjectId) conducted++ })
                 }
-                current.setDate(current.getDate() + 1)
+                pcurr.setDate(pcurr.getDate() + 1)
             }
-            // Estimate attended as conducted - total absences recorded so far
-            const subjectAbsences = absences.filter(a => a.subjectId === subjectId).length
-            attended = Math.max(0, conducted - subjectAbsences)
+            const absCount = absences.filter(a => a.subjectId === subjectId && new Date(a.date) <= today).length
+            attended = Math.max(0, conducted - absCount)
         }
 
-        // Projection: weekly formula
-        const futureClasses = weeklyClasses * weeksLeft
         const finalConducted = conducted + futureClasses
-        const finalAttended = attended + futureClasses // best case: attend all future
-
+        const finalAttended = attended + futureClasses // best case attendance
         const currentPct = conducted === 0 ? 100 : Math.round((attended / conducted) * 100)
         const projectedPct = finalConducted === 0 ? 100 : Math.round((finalAttended / finalConducted) * 100)
 
+        // Weekly context for UI reference
+        let weeklyClasses = 0
+        Object.values(timetable).forEach(daySlots => {
+            daySlots.forEach(subId => { if (subId === subjectId) weeklyClasses++ })
+        })
+
+        const msLeft = end - today
+        const weeksLeft = msLeft <= 0 ? 0 : Math.ceil(msLeft / (7 * 24 * 60 * 60 * 1000))
+
         return {
             currentPct, projectedPct, futureClasses,
-            weeklyClasses, weeksLeft,
-            conducted, attended, finalConducted, finalAttended
+            weeklyClasses, weeksLeft, hpc,
+            conducted: +conducted.toFixed(1),
+            attended: +attended.toFixed(1),
+            finalConducted: +finalConducted.toFixed(1),
+            finalAttended: +finalAttended.toFixed(1)
         }
     },
 

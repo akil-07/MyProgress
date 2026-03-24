@@ -10,6 +10,7 @@ import SemesterPlanner from './SemesterPlanner.jsx'
 import Timetable from './Timetable.jsx'
 import TimetableCalculator from './TimetableCalculator.jsx'
 import Profile from './Profile.jsx'
+import Pomodoro from './Pomodoro.jsx'
 import usePageStore from '../store/pageStore.js'
 
 export default function Home() {
@@ -50,6 +51,7 @@ export default function Home() {
                     <Route path="/timetable-calc" element={<TimetableCalculator />} />
                     <Route path="/assignments" element={<Assignments />} />
                     <Route path="/semester" element={<SemesterPlanner />} />
+                    <Route path="/pomodoro" element={<Pomodoro />} />
                     <Route path="/profile" element={<Profile />} />
                 </Routes>
             </main>
