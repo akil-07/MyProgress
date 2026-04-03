@@ -86,10 +86,16 @@ export default function RecordGenerator() {
     if (step === 3) {
         return (
             <div className="record-generator-print-wrapper" style={{ padding: '40px', maxWidth: 'none', margin: '0 auto' }}>
-                <div style={{ maxWidth: '900px', margin: '0 auto', background: '#fff' }}>
+                <div style={{ maxWidth: '900px', margin: '0 auto', background: '#fff', position: 'relative' }}>
+                
+                <div style={{ position: 'absolute', top: '-10px', right: '0px', fontSize: '11px', color: '#444', fontStyle: 'italic' }}>
+                    Made with MyNotion
+                </div>
+                
                 <style>
                     {`
                     @media print {
+                        @page { margin: 0; }
                         html, body, #root, .app-layout, .main-content {
                             height: auto !important;
                             overflow: visible !important;
@@ -129,6 +135,12 @@ export default function RecordGenerator() {
                             background-color: #ffffff !important;
                             color: #000000 !important;
                         }
+                    }
+                    .record-generator-print-wrapper, .record-generator-print-wrapper * {
+                        color: #000000 !important;
+                    }
+                    .record-generator-print-wrapper a {
+                        color: #1a0dab !important;
                     }
                     .record-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background-color: #fff !important; }
                     .record-table th, .record-table td { border: 1px solid #000 !important; padding: 10px; text-align: center; font-size: 14px; background-color: #fff !important; color: #000 !important; }
@@ -192,17 +204,17 @@ export default function RecordGenerator() {
                 </table>
 
                 {/* Footer Declaration */}
-                <div className="record-generator-footer" style={{ marginTop: 25, fontSize: '14px', fontWeight: 'bold' }}>
-                    <p style={{ marginBottom: 35 }}>I confirm that the experiments and GitHub links provided are entirely my own work.</p>
+                <div className="record-generator-footer" style={{ marginTop: 25, fontSize: '14px', fontWeight: 'bold', color: '#000' }}>
+                    <p style={{ marginBottom: 35, color: '#000' }}>I confirm that the experiments and GitHub links provided are entirely my own work.</p>
                     
-                    <div className="sig-block" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 25 }}>
-                        <div>Name : {studentName}</div>
-                        <div>Register Number : {registerNumber}</div>
+                    <div className="sig-block" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 25, color: '#000' }}>
+                        <div style={{color: '#000'}}>Name : {studentName}</div>
+                        <div style={{color: '#000'}}>Register Number : {registerNumber}</div>
                     </div>
                     
-                    <div className="sig-block" style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <div>Date : {date}</div>
-                        <div>Learner's Signature</div>
+                    <div className="sig-block" style={{ display: 'flex', justifyContent: 'space-between', color: '#000' }}>
+                        <div style={{color: '#000'}}>Date : {date}</div>
+                        <div style={{color: '#000'}}>Learner's Signature</div>
                     </div>
                 </div>
                 </div>
