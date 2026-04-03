@@ -11,6 +11,7 @@ import Timetable from './Timetable.jsx'
 import TimetableCalculator from './TimetableCalculator.jsx'
 import Profile from './Profile.jsx'
 import Pomodoro from './Pomodoro.jsx'
+import RecordGenerator from './RecordGenerator.jsx'
 import usePageStore from '../store/pageStore.js'
 
 export default function Home() {
@@ -53,6 +54,7 @@ export default function Home() {
                     <Route path="/semester" element={<SemesterPlanner />} />
                     <Route path="/pomodoro" element={<Pomodoro />} />
                     <Route path="/profile" element={<Profile />} />
+                    <Route path="/record-generator" element={<RecordGenerator />} />
                 </Routes>
             </main>
 

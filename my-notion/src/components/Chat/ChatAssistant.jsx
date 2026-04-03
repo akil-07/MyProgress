@@ -113,6 +113,7 @@ export default function ChatAssistant() {
     /* ── FAB (closed state) ────────────────────────────── */
     if (!isOpen) return (
         <button
+            className="no-print"
             onClick={() => setIsOpen(true)}
             title="Open AI Assistant"
             style={{
@@ -133,7 +134,7 @@ export default function ChatAssistant() {
 
     /* ── Chat window ────────────────────────────────────── */
     return (
-        <div style={{
+        <div className="no-print" style={{
             position: 'fixed', bottom: 24, right: 24, zIndex: 900,
             width: 360,
             height: isMin ? 56 : 520,

@@ -67,7 +67,7 @@ export default function Pomodoro() {
             padding: '2rem 0',
             fontFamily: "'Inter', sans-serif"
         }}>
-            <div data-testid="panda-timer-header" style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div data-testid="panda-timer-header" style={{ textAlign: 'center', marginBottom: 40, flexShrink: 0 }}>
                 <h1 style={{
                     fontSize: 48,
                     fontWeight: 900,
@@ -90,6 +90,7 @@ export default function Pomodoro() {
             {/* Mode Selector */}
             <div style={{
                 display: 'flex',
+                flexShrink: 0,
                 gap: 6,
                 background: 'var(--bg-secondary)',
                 padding: 8,
@@ -130,6 +131,7 @@ export default function Pomodoro() {
                 position: 'relative',
                 width: 360,
                 height: 360,
+                flexShrink: 0,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -229,7 +231,7 @@ export default function Pomodoro() {
             </div>
 
             {/* Controls */}
-            <div style={{ display: 'flex', gap: 24, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 24, alignItems: 'center', flexShrink: 0 }}>
                 <button
                     onClick={toggleTimer}
                     style={{
@@ -306,6 +308,7 @@ export default function Pomodoro() {
             <div style={{
                 marginTop: 64,
                 display: 'flex',
+                flexShrink: 0,
                 gap: 40,
                 padding: '28px 48px',
                 background: 'linear-gradient(180deg, var(--bg-secondary) 0%, rgba(255,255,255,0.02) 100%)',
