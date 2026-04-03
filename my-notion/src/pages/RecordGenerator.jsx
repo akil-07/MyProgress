@@ -1,6 +1,10 @@
 import React, { useState } from 'react'
 
 export default function RecordGenerator() {
+    const [activeTab, setActiveTab] = useState('new') // 'new' | 'history'
+    const [historyData, setHistoryData] = useState(() => {
+        try { return JSON.parse(localStorage.getItem('record_history')) || [] } catch { return [] }
+    })
     const [step, setStep] = useState(1) // 1: Input, 2: Editor, 3: Print
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
@@ -80,6 +84,37 @@ export default function RecordGenerator() {
 
     const removeRepo = (id) => {
         setRepos(prev => prev.filter(r => r.id !== id))
+    }
+
+    const handleProceedToPrint = () => {
+        const newEntry = {
+            id: Date.now(),
+            username, keyword, courseTitle, studentName, registerNumber, date, repos,
+            savedAt: new Date().toLocaleString()
+        }
+        // Save to local storage
+        const updated = [newEntry, ...historyData].slice(0, 30) // Keep last 30
+        setHistoryData(updated)
+        localStorage.setItem('record_history', JSON.stringify(updated))
+        setStep(3)
+    }
+
+    const loadFromHistory = (entry) => {
+        setUsername(entry.username || '')
+        setKeyword(entry.keyword || '')
+        setCourseTitle(entry.courseTitle || '')
+        setStudentName(entry.studentName || '')
+        setRegisterNumber(entry.registerNumber || '')
+        setDate(entry.date || '')
+        setRepos(entry.repos || [])
+        setStep(2) // Jump directly to editor
+        setActiveTab('new')
+    }
+
+    const deleteHistoryItem = (id) => {
+        const updated = historyData.filter(h => h.id !== id)
+        setHistoryData(updated)
+        localStorage.setItem('record_history', JSON.stringify(updated))
     }
 
     // =========== STEP 3: PRINT VIEW ===========
@@ -233,7 +268,7 @@ export default function RecordGenerator() {
                     </div>
                     <div style={{ display: 'flex', gap: 10 }}>
                         <button className="btn-secondary" onClick={() => setStep(1)}>Cancel</button>
-                        <button className="btn-primary" onClick={() => setStep(3)}>Continue to Print ✨</button>
+                        <button className="btn-primary" onClick={handleProceedToPrint}>Continue to Print ✨</button>
                     </div>
                 </div>
 
@@ -329,22 +364,64 @@ export default function RecordGenerator() {
         transition: 'all 0.2s',
     }
 
-    // =========== STEP 1: INPUT FORM ===========
+    // =========== STEP 1: INPUT FORM & HISTORY ===========
     return (
         <div className="page-container" style={{ maxWidth: 650, margin: '0 auto', paddingTop: 60, paddingBottom: 60 }}>
-            <div style={{ textAlign: 'center', marginBottom: 40 }}>
+            <div style={{ textAlign: 'center', marginBottom: 30 }}>
                 <h1 className="page-title" style={{ fontSize: '32px', marginBottom: 10 }}>Record Generator</h1>
                 <p style={{ color: 'var(--text-secondary)', fontSize: '15px' }}>
                     Automatically fetch your GitHub repositories and generate a beautifully formatted Record Note PDF template complete with QR codes.
                 </p>
             </div>
 
-            <form onSubmit={fetchRepos} style={{ 
-                display: 'flex', flexDirection: 'column', gap: 24, 
-                background: 'var(--bg-card)', padding: '35px', 
-                borderRadius: '20px', border: '1px solid var(--border)',
-                boxShadow: '0 8px 30px rgba(0,0,0,0.08)'
-            }}>
+            {/* Toggle Tabs */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 35 }}>
+                <button 
+                    onClick={() => setActiveTab('new')} 
+                    style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: activeTab === 'new' ? 'var(--accent)' : 'var(--bg-secondary)', color: activeTab === 'new' ? '#fff' : 'var(--text-secondary)' }}
+                >📝 Create New</button>
+                <button 
+                    onClick={() => setActiveTab('history')} 
+                    style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: activeTab === 'history' ? 'var(--accent)' : 'var(--bg-secondary)', color: activeTab === 'history' ? '#fff' : 'var(--text-secondary)' }}
+                >⏳ History ({historyData.length})</button>
+            </div>
+
+            {activeTab === 'history' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                    {historyData.length === 0 ? (
+                        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed var(--border)', borderRadius: 12 }}>
+                            No saved records found. Create one first!
+                        </div>
+                    ) : (
+                        historyData.map(entry => (
+                            <div key={entry.id} style={{ 
+                                background: 'var(--bg-card)', padding: 20, borderRadius: 16, border: '1px solid var(--border)',
+                                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                            }}>
+                                <div>
+                                    <h3 style={{ margin: '0 0 6px 0', fontSize: 16 }}>{entry.courseTitle || 'Untitled Course'}</h3>
+                                    <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>
+                                        Saved on {entry.savedAt} • {entry.repos?.length || 0} Exps
+                                    </div>
+                                    <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                                        {entry.studentName} ({entry.registerNumber})
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', gap: 8 }}>
+                                    <button onClick={() => deleteHistoryItem(entry.id)} className="btn-secondary" style={{ padding: '8px', color: 'var(--danger)', borderColor: 'var(--danger)' }} title="Delete">🗑️</button>
+                                    <button onClick={() => loadFromHistory(entry)} className="btn-primary" style={{ padding: '8px 16px' }}>Load & Print</button>
+                                </div>
+                            </div>
+                        ))
+                    )}
+                </div>
+            ) : (
+                <form onSubmit={fetchRepos} style={{ 
+                    display: 'flex', flexDirection: 'column', gap: 24, 
+                    background: 'var(--bg-card)', padding: '35px', 
+                    borderRadius: '20px', border: '1px solid var(--border)',
+                    boxShadow: '0 8px 30px rgba(0,0,0,0.08)'
+                }}>
                 {error && <div style={{ color: 'var(--danger)', padding: 12, border: '1px solid var(--danger)', borderRadius: 10, background: 'var(--danger-light)' }}>{error}</div>}
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
@@ -392,6 +469,7 @@ export default function RecordGenerator() {
                     {loading ? 'Fetching from GitHub...' : 'Review & Edit Experiments ✨'}
                 </button>
             </form>
+            )}
         </div>
     )
 }
