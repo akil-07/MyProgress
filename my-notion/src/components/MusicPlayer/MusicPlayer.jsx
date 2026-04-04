@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { get, set } from 'idb-keyval'
 
 export default function MusicPlayer() {
     const [isOpen, setIsOpen] = useState(false)
@@ -14,20 +15,35 @@ export default function MusicPlayer() {
         if (audioRef.current) {
             audioRef.current.volume = 0.5
         }
+
+        // Load persisted tracks from IndexedDB
+        get('mynotion_music').then(saved => {
+            if (saved && Array.isArray(saved)) {
+                const loaded = saved.map(item => ({
+                    ...item,
+                    url: item.fileBlob ? URL.createObjectURL(item.fileBlob) : ''
+                }))
+                setPlaylist(loaded)
+            }
+        }).catch(err => console.error("Failed to load music:", err))
     }, [])
 
     const handleFiles = (filesArray) => {
         if (filesArray.length === 0) return
 
         const newTracks = filesArray.filter(f => f.type.startsWith('audio/')).map(file => ({
+            id: Math.random().toString(36).substring(7),
             name: file.name.replace(/\.[^/.]+$/, ""), // remove extension
-            url: URL.createObjectURL(file), // create temporary URL
+            fileBlob: file,
+            url: URL.createObjectURL(file), // create temporary session URL
         }))
 
         if (newTracks.length === 0) return;
 
         setPlaylist(prev => {
             const newList = [...prev, ...newTracks]
+            // Save Blobs to IndexedDB
+            set('mynotion_music', newList.map(t => ({ id: t.id, name: t.name, fileBlob: t.fileBlob })))
             if (prev.length === 0) setCurrentTrackIdx(0)
             return newList
         })
@@ -97,10 +113,11 @@ export default function MusicPlayer() {
     const removeTrack = (e, index) => {
         e.stopPropagation()
         const newPlaylist = [...playlist]
-        URL.revokeObjectURL(newPlaylist[index].url) // cleanup
+        if (newPlaylist[index].url) URL.revokeObjectURL(newPlaylist[index].url) // cleanup
         newPlaylist.splice(index, 1) // remove track
         
         setPlaylist(newPlaylist)
+        set('mynotion_music', newPlaylist.map(t => ({ id: t.id, name: t.name, fileBlob: t.fileBlob })))
         
         if (newPlaylist.length === 0) {
             setCurrentTrackIdx(0)
