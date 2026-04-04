@@ -14,6 +14,7 @@ import Profile from './Profile.jsx'
 import Pomodoro from './Pomodoro.jsx'
 import RecordGenerator from './RecordGenerator.jsx'
 import usePageStore from '../store/pageStore.js'
+import { LiquidButton } from '../components/ui/liquid-glass-button.tsx'
 
 export default function Home() {
     const { pages, createPage } = usePageStore()
@@ -86,9 +87,9 @@ function EmptyHome({ onCreatePage, pageCount }) {
             </p>
 
             {pageCount === 0 && (
-                <button className="btn-primary" onClick={onCreatePage}>
+                <LiquidButton onClick={onCreatePage}>
                     ✦ Create First Page
-                </button>
+                </LiquidButton>
             )}
 
             <div className="empty-tips-grid" style={{
