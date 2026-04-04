@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import useAcademicStore from '../store/academicStore.js'
 
 const DAYS = [
@@ -20,13 +20,32 @@ const SLOTS = [
 
 export default function Timetable() {
     const { subjects, timetable, updateTimetableSlot } = useAcademicStore()
+    const [isEditing, setIsEditing] = useState(false)
 
     return (
         <div className="page-container" style={{ maxWidth: 1000 }}>
-            <h1 style={{ fontSize: 34, fontWeight: 800, marginBottom: 24, color: 'var(--text-primary)' }}>📅 Timetable</h1>
-            <p style={{ fontSize: 14, color: 'var(--text-muted)', marginBottom: 28, lineHeight: 1.5 }}>
-                Configure your weekly class schedule. The attendance calculator will automatically track classes based on this timetable.
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
+                <div>
+                    <h1 style={{ fontSize: 34, fontWeight: 800, marginBottom: 8, color: 'var(--text-primary)' }}>📅 Timetable</h1>
+                    <p style={{ fontSize: 14, color: 'var(--text-muted)', lineHeight: 1.5, margin: 0, maxWidth: 600 }}>
+                        Configure your weekly class schedule. The attendance calculator will automatically track classes based on this timetable.
+                    </p>
+                </div>
+                <button 
+                    onClick={() => setIsEditing(!isEditing)}
+                    style={{
+                        padding: '10px 20px', borderRadius: 10,
+                        background: isEditing ? 'var(--accent)' : 'var(--bg-card)',
+                        color: isEditing ? '#fff' : 'var(--text-primary)',
+                        border: `1px solid ${isEditing ? 'var(--accent)' : 'var(--border)'}`,
+                        fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font)',
+                        transition: 'all 0.2s', display: 'flex', gap: 8, alignItems: 'center', whiteSpace: 'nowrap',
+                        boxShadow: isEditing ? '0 4px 12px rgba(99, 102, 241, 0.3)' : 'none'
+                    }}
+                >
+                    {isEditing ? '💾 Save Timetable' : '✏️ Edit Timetable'}
+                </button>
+            </div>
 
             <div style={{ overflowX: 'auto', background: 'var(--bg-secondary)', borderRadius: 14, border: '1px solid var(--border)' }}>
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse', textAlign: 'left' }}>
@@ -42,28 +61,50 @@ export default function Timetable() {
                         {DAYS.map(d => (
                             <tr key={d.id} style={{ borderBottom: '1px solid var(--border)' }}>
                                 <td style={{ padding: '16px', fontWeight: 600, color: 'var(--text-primary)' }}>{d.name}</td>
-                                {SLOTS.map(s => (
-                                    <td key={s.id} style={{ padding: '12px', borderLeft: '1px solid var(--border)' }}>
-                                        {s.id === 2 ? (
-                                            <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', fontWeight: 500 }}>Lunch Break</div>
-                                        ) : (
-                                            <select
-                                                value={timetable[d.id]?.[s.id] || ''}
-                                                onChange={(e) => updateTimetableSlot(d.id, s.id, e.target.value || null)}
-                                                style={{
-                                                    width: '100%', padding: '8px 12px', borderRadius: 8,
-                                                    border: '1px solid var(--border)', background: 'var(--bg-card)',
-                                                    color: 'var(--text-primary)', outline: 'none', cursor: 'pointer', fontFamily: 'var(--font)'
-                                                }}
-                                            >
-                                                <option value="">- Free -</option>
-                                                {subjects.map(sub => (
-                                                    <option key={sub.id} value={sub.id}>{sub.name}</option>
-                                                ))}
-                                            </select>
-                                        )}
-                                    </td>
-                                ))}
+                                {SLOTS.map(s => {
+                                    const selectedSubjectId = timetable[d.id]?.[s.id]
+                                    const assignedSubject = subjects.find(sub => sub.id === selectedSubjectId)
+                                    
+                                    return (
+                                        <td key={s.id} style={{ padding: '12px', borderLeft: '1px solid var(--border)' }}>
+                                            {s.id === 2 ? (
+                                                <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', fontWeight: 500 }}>Lunch Break</div>
+                                            ) : (
+                                                isEditing ? (
+                                                    <select
+                                                        value={selectedSubjectId || ''}
+                                                        onChange={(e) => updateTimetableSlot(d.id, s.id, e.target.value || null)}
+                                                        style={{
+                                                            width: '100%', padding: '8px 12px', borderRadius: 8,
+                                                            border: '1px solid var(--border)', background: 'var(--bg-card)',
+                                                            color: 'var(--text-primary)', outline: 'none', cursor: 'pointer', fontFamily: 'var(--font)'
+                                                        }}
+                                                    >
+                                                        <option value="">- Free -</option>
+                                                        {subjects.map(sub => (
+                                                            <option key={sub.id} value={sub.id}>{sub.name}</option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    assignedSubject ? (
+                                                        <div style={{
+                                                            padding: '8px 12px', borderRadius: 8, textAlign: 'center',
+                                                            background: 'var(--bg-card)', border: '1px solid var(--border)',
+                                                            color: 'var(--text-primary)', fontWeight: 600, fontSize: 13,
+                                                            boxShadow: 'var(--shadow-sm)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                                                        }}>
+                                                            {assignedSubject.name}
+                                                        </div>
+                                                    ) : (
+                                                        <div style={{ padding: '8px 12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, opacity: 0.7 }}>
+                                                            - Free -
+                                                        </div>
+                                                    )
+                                                )
+                                            )}
+                                        </td>
+                                    )
+                                })}
                             </tr>
                         ))}
                     </tbody>
