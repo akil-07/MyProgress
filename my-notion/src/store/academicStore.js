@@ -58,6 +58,14 @@ const useAcademicStore = create((set, get) => ({
         5: [null, null, 'lunch', null, null],
         6: [null, null, 'lunch', null, null]
     },
+    timetableRooms: LS('mynotion_timetableRooms').load() || {
+        1: [null, null, null, null, null],
+        2: [null, null, null, null, null],
+        3: [null, null, null, null, null],
+        4: [null, null, null, null, null],
+        5: [null, null, null, null, null],
+        6: [null, null, null, null, null]
+    },
     updateTimetableSlot: (day, slot, subjectId) => {
         const newTimetable = { ...get().timetable }
         const daySlots = [...newTimetable[day]]
@@ -65,6 +73,15 @@ const useAcademicStore = create((set, get) => ({
         newTimetable[day] = daySlots
         LS('mynotion_timetable').save(newTimetable)
         set({ timetable: newTimetable })
+    },
+    updateTimetableRoom: (day, slot, room) => {
+        const newRooms = { ...get().timetableRooms }
+        for (let i=1; i<=6; i++) { if (!newRooms[i]) newRooms[i] = [null,null,null,null,null]; }
+        const daySlots = [...newRooms[day]]
+        daySlots[slot] = room
+        newRooms[day] = daySlots
+        LS('mynotion_timetableRooms').save(newRooms)
+        set({ timetableRooms: newRooms })
     },
 
     // ════════════ ABSENCES ════════════

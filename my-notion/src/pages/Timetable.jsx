@@ -21,7 +21,7 @@ const SLOTS = [
 ]
 
 export default function Timetable() {
-    const { subjects, timetable, updateTimetableSlot } = useAcademicStore()
+    const { subjects, timetable, timetableRooms, updateTimetableSlot, updateTimetableRoom } = useAcademicStore()
     const [isEditing, setIsEditing] = useState(false)
     const timetableRef = useRef(null)
 
@@ -103,6 +103,7 @@ export default function Timetable() {
                                 {SLOTS.map(s => {
                                     const selectedSubjectId = timetable[d.id]?.[s.id]
                                     const assignedSubject = subjects.find(sub => sub.id === selectedSubjectId)
+                                    const roomNumber = timetableRooms?.[d.id]?.[s.id]
                                     
                                     return (
                                         <td key={s.id} style={{ padding: '12px', borderLeft: '1px solid var(--border)' }}>
@@ -110,29 +111,52 @@ export default function Timetable() {
                                                 <div style={{ color: 'var(--text-muted)', fontSize: 13, textAlign: 'center', fontWeight: 500 }}>Lunch Break</div>
                                             ) : (
                                                 isEditing ? (
-                                                    <select
-                                                        value={selectedSubjectId || ''}
-                                                        onChange={(e) => updateTimetableSlot(d.id, s.id, e.target.value || null)}
-                                                        style={{
-                                                            width: '100%', padding: '8px 12px', borderRadius: 8,
-                                                            border: '1px solid var(--border)', background: 'var(--bg-card)',
-                                                            color: 'var(--text-primary)', outline: 'none', cursor: 'pointer', fontFamily: 'var(--font)'
-                                                        }}
-                                                    >
-                                                        <option value="">- Free -</option>
-                                                        {subjects.map(sub => (
-                                                            <option key={sub.id} value={sub.id}>{sub.name}</option>
-                                                        ))}
-                                                    </select>
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                                        <select
+                                                            value={selectedSubjectId || ''}
+                                                            onChange={(e) => updateTimetableSlot(d.id, s.id, e.target.value || null)}
+                                                            style={{
+                                                                width: '100%', padding: '8px 12px', borderRadius: 8,
+                                                                border: '1px solid var(--border)', background: 'var(--bg-card)',
+                                                                color: 'var(--text-primary)', outline: 'none', cursor: 'pointer', fontFamily: 'var(--font)'
+                                                            }}
+                                                        >
+                                                            <option value="">- Free -</option>
+                                                            {subjects.map(sub => (
+                                                                <option key={sub.id} value={sub.id}>{sub.name}</option>
+                                                            ))}
+                                                        </select>
+                                                        {selectedSubjectId && (
+                                                            <input 
+                                                                type="text" 
+                                                                placeholder="Room / Class No."
+                                                                value={roomNumber || ''}
+                                                                onChange={(e) => updateTimetableRoom(d.id, s.id, e.target.value)}
+                                                                style={{
+                                                                    width: '100%', padding: '6px 10px', borderRadius: 6, fontSize: 12,
+                                                                    border: '1px dashed var(--border)', background: 'var(--bg-primary)',
+                                                                    color: 'var(--text-primary)', outline: 'none', fontFamily: 'var(--font)',
+                                                                    boxSizing: 'border-box'
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     assignedSubject ? (
                                                         <div style={{
                                                             padding: '8px 12px', borderRadius: 8, textAlign: 'center',
                                                             background: 'var(--bg-card)', border: '1px solid var(--border)',
                                                             color: 'var(--text-primary)', fontWeight: 600, fontSize: 13,
-                                                            boxShadow: 'var(--shadow-sm)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'
+                                                            boxShadow: 'var(--shadow-sm)', display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center'
                                                         }}>
-                                                            {assignedSubject.name}
+                                                            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', width: '100%' }}>
+                                                                {assignedSubject.name}
+                                                            </div>
+                                                            {roomNumber && (
+                                                                <div style={{ fontSize: 11, padding: '2px 6px', background: 'var(--bg-active)', borderRadius: 4, color: 'var(--text-muted)' }}>
+                                                                    📍 {roomNumber}
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     ) : (
                                                         <div style={{ padding: '8px 12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 13, opacity: 0.7 }}>
