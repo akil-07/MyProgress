@@ -1,5 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import useAcademicStore from '../store/academicStore.js'
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 const DAYS = [
     { id: 1, name: 'Monday' },
@@ -21,6 +23,26 @@ const SLOTS = [
 export default function Timetable() {
     const { subjects, timetable, updateTimetableSlot } = useAcademicStore()
     const [isEditing, setIsEditing] = useState(false)
+    const timetableRef = useRef(null)
+
+    const downloadPDF = async () => {
+        if (!timetableRef.current) return
+        
+        try {
+            const canvas = await html2canvas(timetableRef.current, { scale: 2 })
+            const imgData = canvas.toDataURL('image/png')
+            const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth()
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+            
+            // Add a small margin at the top
+            pdf.addImage(imgData, 'PNG', 0, 10, pdfWidth, pdfHeight)
+            pdf.save('My_Timetable.pdf')
+        } catch (error) {
+            console.error('Failed to generate PDF', error)
+        }
+    }
 
     return (
         <div className="page-container" style={{ maxWidth: 1000 }}>
@@ -31,23 +53,40 @@ export default function Timetable() {
                         Configure your weekly class schedule. The attendance calculator will automatically track classes based on this timetable.
                     </p>
                 </div>
-                <button 
-                    onClick={() => setIsEditing(!isEditing)}
-                    style={{
-                        padding: '10px 20px', borderRadius: 10,
-                        background: isEditing ? 'var(--accent)' : 'var(--bg-card)',
-                        color: isEditing ? '#fff' : 'var(--text-primary)',
-                        border: `1px solid ${isEditing ? 'var(--accent)' : 'var(--border)'}`,
-                        fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font)',
-                        transition: 'all 0.2s', display: 'flex', gap: 8, alignItems: 'center', whiteSpace: 'nowrap',
-                        boxShadow: isEditing ? '0 4px 12px rgba(99, 102, 241, 0.3)' : 'none'
-                    }}
-                >
-                    {isEditing ? '💾 Save Timetable' : '✏️ Edit Timetable'}
-                </button>
+                <div style={{ display: 'flex', gap: 12 }}>
+                    {!isEditing && (
+                        <button 
+                            onClick={downloadPDF}
+                            style={{
+                                padding: '10px 20px', borderRadius: 10,
+                                background: 'transparent',
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border)',
+                                fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font)',
+                                transition: 'all 0.2s', display: 'flex', gap: 8, alignItems: 'center', whiteSpace: 'nowrap'
+                            }}
+                        >
+                            📥 Download PDF
+                        </button>
+                    )}
+                    <button 
+                        onClick={() => setIsEditing(!isEditing)}
+                        style={{
+                            padding: '10px 20px', borderRadius: 10,
+                            background: isEditing ? 'var(--accent)' : 'var(--bg-card)',
+                            color: isEditing ? '#fff' : 'var(--text-primary)',
+                            border: `1px solid ${isEditing ? 'var(--accent)' : 'var(--border)'}`,
+                            fontWeight: 600, cursor: 'pointer', fontFamily: 'var(--font)',
+                            transition: 'all 0.2s', display: 'flex', gap: 8, alignItems: 'center', whiteSpace: 'nowrap',
+                            boxShadow: isEditing ? '0 4px 12px rgba(99, 102, 241, 0.3)' : 'none'
+                        }}
+                    >
+                        {isEditing ? '💾 Save Timetable' : '✏️ Edit Timetable'}
+                    </button>
+                </div>
             </div>
 
-            <div style={{ overflowX: 'auto', background: 'var(--bg-secondary)', borderRadius: 14, border: '1px solid var(--border)' }}>
+            <div ref={timetableRef} style={{ overflowX: 'auto', background: 'var(--bg-secondary)', borderRadius: 14, border: '1px solid var(--border)', padding: '16px' }}>
                 <table style={{ width: '100%', minWidth: 800, borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
                         <tr>
