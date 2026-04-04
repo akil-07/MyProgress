@@ -1,13 +1,29 @@
 import React, { useState } from 'react'
 
 export default function RecordGenerator() {
-    const [activeTab, setActiveTab] = useState('new') // 'new' | 'history'
+    const [activeTab, setActiveTab] = useState('auto') // 'auto' | 'manual' | 'history'
     const [historyData, setHistoryData] = useState(() => {
         try { return JSON.parse(localStorage.getItem('record_history')) || [] } catch { return [] }
     })
-    const [step, setStep] = useState(1) // 1: Input, 2: Editor, 3: Print
+    const [step, setStep] = useState(1) // 1: Input, 1.5: Select Repos, 2: Editor, 3: Print
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
+    const [allFetchedRepos, setAllFetchedRepos] = useState([])
+    const [selectedImportIds, setSelectedImportIds] = useState([])
+    const [searchTerm, setSearchTerm] = useState('')
+
+    // Premium input styling
+    const premiumInputStyle = {
+        width: '100%',
+        padding: '12px 16px',
+        borderRadius: '10px',
+        border: '1.5px solid var(--border)',
+        background: 'var(--bg-secondary)',
+        color: 'var(--text-primary)',
+        fontSize: '14px',
+        outline: 'none',
+        transition: 'all 0.2s',
+    }
     
     // Form State
     const [username, setUsername] = useState('')
@@ -61,6 +77,48 @@ export default function RecordGenerator() {
         }
     }
 
+    const fetchAccountRepos = async (e) => {
+        e.preventDefault()
+        setLoading(true)
+        setError(null)
+        try {
+            const res = await fetch(`https://api.github.com/users/${username}/repos?per_page=100&sort=created&direction=desc`)
+            if (!res.ok) throw new Error("GitHub user not found.")
+            const data = await res.json()
+            if (data.length === 0) throw new Error("No repositories found.")
+            setAllFetchedRepos(data.map(r => ({
+                id: r.id,
+                title: r.description || r.name,
+                date: new Date(r.created_at).toLocaleDateString('en-GB'),
+                url: r.html_url
+            })))
+            setSelectedImportIds([]) // reset
+            setStep(1.5)
+        } catch (err) { setError(err.message) }
+        finally { setLoading(false) }
+    }
+
+    const confirmImport = () => {
+        const selected = allFetchedRepos.filter(r => selectedImportIds.includes(r.id))
+        setRepos(selected)
+        setStep(2)
+    }
+
+    const toggleImportId = (id) => {
+        setSelectedImportIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id])
+    }
+
+    const startManualEntry = (e) => {
+        e.preventDefault()
+        // Provide one blank row immediately
+        setRepos([{ id: Date.now(), title: '', date: new Date().toLocaleDateString('en-GB'), url: '' }])
+        setStep(2)
+    }
+
+    const addNewRepo = () => {
+        setRepos(prev => [...prev, { id: Date.now(), title: '', date: new Date().toLocaleDateString('en-GB'), url: '' }])
+    }
+
     // Handlers for Step 2 (Editor)
     const handleRepoChange = (id, field, value) => {
         setRepos(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
@@ -108,7 +166,7 @@ export default function RecordGenerator() {
         setDate(entry.date || '')
         setRepos(entry.repos || [])
         setStep(2) // Jump directly to editor
-        setActiveTab('new')
+        setActiveTab('auto')
     }
 
     const deleteHistoryItem = (id) => {
@@ -257,6 +315,68 @@ export default function RecordGenerator() {
         )
     }
 
+    // =========== STEP 1.5: SELECT REPOS VIEW ===========
+    if (step === 1.5) {
+        return (
+            <div className="page-container" style={{ maxWidth: 800, margin: '0 auto', paddingTop: 40, paddingBottom: 60 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 30 }}>
+                    <div>
+                        <h1 className="page-title" style={{ marginBottom: 5 }}>Select Repositories</h1>
+                        <p style={{ color: 'var(--text-secondary)' }}>Choose exactly which repositories you want to include in your record.</p>
+                    </div>
+                    <div style={{ display: 'flex', gap: 10 }}>
+                        <button className="btn-secondary" onClick={() => setStep(1)}>Back</button>
+                        <button className="btn-primary" onClick={confirmImport} disabled={selectedImportIds.length === 0}>
+                            Import {selectedImportIds.length > 0 ? selectedImportIds.length : ''} Items ✨
+                        </button>
+                    </div>
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                    <input 
+                        type="search"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        style={{ ...premiumInputStyle, padding: '14px 16px', fontSize: '15px' }}
+                        placeholder="🔍 Search fetched repositories by name..."
+                        onFocus={e => e.target.style.borderColor = 'var(--accent)'} 
+                        onBlur={e => e.target.style.borderColor = 'var(--border)'}
+                    />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 15 }}>
+                    {allFetchedRepos.filter(r => r.title.toLowerCase().includes(searchTerm.toLowerCase())).map(repo => {
+                        const isSelected = selectedImportIds.includes(repo.id);
+                        return (
+                            <div 
+                                key={repo.id} 
+                                onClick={() => toggleImportId(repo.id)}
+                                style={{ 
+                                    padding: '16px', borderRadius: '12px', border: `2px solid ${isSelected ? 'var(--accent)' : 'var(--border)'}`,
+                                    background: isSelected ? 'var(--bg-active)' : 'var(--bg-card)',
+                                    cursor: 'pointer', transition: 'all 0.2s', display: 'flex', gap: '15px'
+                                }}
+                            >
+                                <div style={{ 
+                                    width: '20px', height: '20px', borderRadius: '4px', marginTop: '2px',
+                                    border: `2px solid ${isSelected ? 'var(--accent)' : 'var(--text-muted)'}`,
+                                    background: isSelected ? 'var(--accent)' : 'transparent',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                }}>
+                                    {isSelected && <span style={{ color: '#fff', fontSize: '14px', lineHeight: 1 }}>✓</span>}
+                                </div>
+                                <div style={{ overflow: 'hidden' }}>
+                                    <h4 style={{ margin: '0 0 5px 0', fontSize: '15px', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{repo.title}</h4>
+                                    <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{repo.date}</div>
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+        )
+    }
+
     // =========== STEP 2: EDITOR VIEW ===========
     if (step === 2) {
         return (
@@ -313,9 +433,13 @@ export default function RecordGenerator() {
                                         style={{ width: 140, fontSize: 13, padding: '6px 10px' }}
                                         placeholder="DD/MM/YYYY"
                                     />
-                                    <a href={repo.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'var(--text-muted)', textDecoration: 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 300 }}>
-                                        {repo.url}
-                                    </a>
+                                    <input 
+                                        value={repo.url}
+                                        onChange={(e) => handleRepoChange(repo.id, 'url', e.target.value)}
+                                        className="form-input"
+                                        style={{ flex: 1, fontSize: 13, padding: '6px 10px' }}
+                                        placeholder="Paste Link (https://...)"
+                                    />
                                 </div>
                             </div>
                             
@@ -346,22 +470,15 @@ export default function RecordGenerator() {
                             </div>
                         </div>
                     ))}
+                    
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
+                        <button className="btn-secondary" onClick={addNewRepo} style={{ padding: '12px 20px', borderStyle: 'dashed', width: '100%', fontWeight: 600 }}>
+                            + Add Custom Experiment Row
+                        </button>
+                    </div>
                 </div>
             </div>
         )
-    }
-
-    // Premium input styling
-    const premiumInputStyle = {
-        width: '100%',
-        padding: '12px 16px',
-        borderRadius: '10px',
-        border: '1.5px solid var(--border)',
-        background: 'var(--bg-secondary)',
-        color: 'var(--text-primary)',
-        fontSize: '14px',
-        outline: 'none',
-        transition: 'all 0.2s',
     }
 
     // =========== STEP 1: INPUT FORM & HISTORY ===========
@@ -377,16 +494,24 @@ export default function RecordGenerator() {
             {/* Toggle Tabs */}
             <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 35 }}>
                 <button 
-                    onClick={() => setActiveTab('new')} 
-                    style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: activeTab === 'new' ? 'var(--accent)' : 'var(--bg-secondary)', color: activeTab === 'new' ? '#fff' : 'var(--text-secondary)' }}
-                >📝 Create New</button>
+                    onClick={() => setActiveTab('auto')} 
+                    style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: activeTab === 'auto' ? 'var(--accent)' : 'var(--bg-secondary)', color: activeTab === 'auto' ? '#fff' : 'var(--text-secondary)' }}
+                >🤖 Auto (GitHub)</button>
+                <button 
+                    onClick={() => setActiveTab('import')} 
+                    style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: activeTab === 'import' ? 'var(--accent)' : 'var(--bg-secondary)', color: activeTab === 'import' ? '#fff' : 'var(--text-secondary)' }}
+                >📥 Import</button>
+                <button 
+                    onClick={() => setActiveTab('manual')} 
+                    style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: activeTab === 'manual' ? 'var(--accent)' : 'var(--bg-secondary)', color: activeTab === 'manual' ? '#fff' : 'var(--text-secondary)' }}
+                >✍️ Manual Entry</button>
                 <button 
                     onClick={() => setActiveTab('history')} 
                     style={{ padding: '8px 20px', borderRadius: 20, border: 'none', cursor: 'pointer', fontWeight: 600, transition: 'all 0.2s', background: activeTab === 'history' ? 'var(--accent)' : 'var(--bg-secondary)', color: activeTab === 'history' ? '#fff' : 'var(--text-secondary)' }}
                 >⏳ History ({historyData.length})</button>
             </div>
 
-            {activeTab === 'history' ? (
+            {activeTab === 'history' && (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     {historyData.length === 0 ? (
                         <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', border: '1px dashed var(--border)', borderRadius: 12 }}>
@@ -415,8 +540,10 @@ export default function RecordGenerator() {
                         ))
                     )}
                 </div>
-            ) : (
-                <form onSubmit={fetchRepos} style={{ 
+            )}
+
+            {(activeTab === 'auto' || activeTab === 'import' || activeTab === 'manual') && (
+                <form onSubmit={activeTab === 'auto' ? fetchRepos : activeTab === 'import' ? fetchAccountRepos : startManualEntry} style={{ 
                     display: 'flex', flexDirection: 'column', gap: 24, 
                     background: 'var(--bg-card)', padding: '35px', 
                     borderRadius: '20px', border: '1px solid var(--border)',
@@ -424,18 +551,22 @@ export default function RecordGenerator() {
                 }}>
                 {error && <div style={{ color: 'var(--danger)', padding: 12, border: '1px solid var(--danger)', borderRadius: 10, background: 'var(--danger-light)' }}>{error}</div>}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-                    <div>
-                        <label className="form-label" style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>GitHub Username <span style={{color:'var(--accent)'}}>*</span></label>
-                        <input required style={premiumInputStyle} value={username} onChange={e => setUsername(e.target.value)} placeholder="Add here"
-                               onFocus={e => e.target.style.borderColor = 'var(--accent)'} onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+                {(activeTab === 'auto' || activeTab === 'import') && (
+                    <div style={{ display: 'grid', gridTemplateColumns: activeTab === 'import' ? '1fr' : '1fr 1fr', gap: 20 }}>
+                        <div>
+                            <label className="form-label" style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>GitHub Username <span style={{color:'var(--accent)'}}>*</span></label>
+                            <input required style={premiumInputStyle} value={username} onChange={e => setUsername(e.target.value)} placeholder="Add here"
+                                   onFocus={e => e.target.style.borderColor = 'var(--accent)'} onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+                        </div>
+                        {activeTab === 'auto' && (
+                            <div>
+                                <label className="form-label" style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Keyword Filter <span style={{color:'var(--accent)'}}>*</span></label>
+                                <input required style={premiumInputStyle} value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="Add here"
+                                       onFocus={e => e.target.style.borderColor = 'var(--accent)'} onBlur={e => e.target.style.borderColor = 'var(--border)'} />
+                            </div>
+                        )}
                     </div>
-                    <div>
-                        <label className="form-label" style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Keyword Filter <span style={{color:'var(--accent)'}}>*</span></label>
-                        <input required style={premiumInputStyle} value={keyword} onChange={e => setKeyword(e.target.value)} placeholder="Add here"
-                               onFocus={e => e.target.style.borderColor = 'var(--accent)'} onBlur={e => e.target.style.borderColor = 'var(--border)'} />
-                    </div>
-                </div>
+                )}
 
                 <div>
                     <label className="form-label" style={{ display: 'block', marginBottom: 8, fontWeight: 500 }}>Course Title</label>
@@ -466,7 +597,9 @@ export default function RecordGenerator() {
                     marginTop: 10, padding: '14px', fontSize: '15px', fontWeight: 600,
                     background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', border: 'none', borderRadius: '12px'
                 }}>
-                    {loading ? 'Fetching from GitHub...' : 'Review & Edit Experiments ✨'}
+                    {activeTab === 'auto' ? (loading ? 'Fetching from GitHub...' : 'Review & Edit Experiments ✨') 
+                    : activeTab === 'import' ? (loading ? 'Fetching Repositories...' : 'Fetch My Repositories ✨') 
+                    : 'Start Manual Entry ✨'}
                 </button>
             </form>
             )}
