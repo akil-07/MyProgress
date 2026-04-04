@@ -6,6 +6,7 @@ import Tasks from './Tasks.jsx'
 import Attendance from './Attendance.jsx'
 import Assignments from './Assignments.jsx'
 import ChatAssistant from '../components/Chat/ChatAssistant.jsx'
+import MusicPlayer from '../components/MusicPlayer/MusicPlayer.jsx'
 import SemesterPlanner from './SemesterPlanner.jsx'
 import Timetable from './Timetable.jsx'
 import TimetableCalculator from './TimetableCalculator.jsx'
@@ -58,6 +59,7 @@ export default function Home() {
                 </Routes>
             </main>
 
+            <MusicPlayer />
             <ChatAssistant />
         </div>
     )
