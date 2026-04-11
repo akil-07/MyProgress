@@ -446,6 +446,7 @@ export default async function handler(req, res) {
             },
         })
     } catch (error) {
+        console.error('Moodle Sync Error:', error)
         const statusCode = error.code === 'invalidtoken' ? 401 : 500
         const message = error.code === 'invalidtoken'
             ? 'Invalid Moodle token. Generate a fresh token and try again.'
