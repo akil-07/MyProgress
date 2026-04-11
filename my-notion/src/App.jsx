@@ -5,6 +5,7 @@ import { auth, isFirebaseConfigured } from './services/firebase.js'
 import { loadUserData, setupSync } from './services/storeSync.js'
 import Home from './pages/Home.jsx'
 import Login from './pages/Login.jsx'
+import useAuthStore from './store/authStore.js'
 
 // Apply saved theme immediately
 const savedTheme = localStorage.getItem('theme') || 'light'
@@ -23,6 +24,7 @@ export default function App() {
 
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser)
+      useAuthStore.setState({ user: currentUser, loading: false })
       if (currentUser) {
         // Load the data initially from Firestore
         await loadUserData(currentUser.uid)
