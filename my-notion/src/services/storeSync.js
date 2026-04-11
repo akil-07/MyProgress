@@ -20,8 +20,25 @@ export async function loadUserData(uid) {
                 useAcademicStore.setState({
                     subjects: data.academic.subjects || [],
                     semester: data.academic.semester || {},
-                    assignments: data.academic.assignments || []
+                    assignments: data.academic.assignments || [],
+                    timetable: data.academic.timetable || useAcademicStore.getState().timetable,
+                    timetableRooms: data.academic.timetableRooms || useAcademicStore.getState().timetableRooms,
+                    absences: data.academic.absences || [],
+                    hoursPerClass: data.academic.hoursPerClass || useAcademicStore.getState().hoursPerClass
                 })
+                
+                // Keep local storage in sync as well
+                try {
+                    if (data.academic.subjects) localStorage.setItem('mynotion_subjects', JSON.stringify(data.academic.subjects))
+                    if (data.academic.semester) localStorage.setItem('mynotion_semester', JSON.stringify(data.academic.semester))
+                    if (data.academic.assignments) localStorage.setItem('mynotion_assignments', JSON.stringify(data.academic.assignments))
+                    if (data.academic.timetable) localStorage.setItem('mynotion_timetable', JSON.stringify(data.academic.timetable))
+                    if (data.academic.timetableRooms) localStorage.setItem('mynotion_timetableRooms', JSON.stringify(data.academic.timetableRooms))
+                    if (data.academic.absences) localStorage.setItem('mynotion_absences', JSON.stringify(data.academic.absences))
+                    if (data.academic.hoursPerClass) localStorage.setItem('mynotion_hpc', JSON.stringify(data.academic.hoursPerClass))
+                } catch (e) {
+                    // Ignore LS errors
+                }
             }
         } else {
             // New user, save initial local state to firestore
@@ -46,7 +63,11 @@ export function saveUserData(uid) {
         academic: {
             subjects: academic.subjects,
             semester: academic.semester,
-            assignments: academic.assignments
+            assignments: academic.assignments,
+            timetable: academic.timetable,
+            timetableRooms: academic.timetableRooms,
+            absences: academic.absences,
+            hoursPerClass: academic.hoursPerClass
         },
         updatedAt: new Date().toISOString()
     }

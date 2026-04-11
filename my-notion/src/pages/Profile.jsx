@@ -1,10 +1,12 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 import useAuthStore from '../store/authStore.js'
 import usePageStore from '../store/pageStore.js'
 import useTaskStore from '../store/taskStore.js'
 
 export default function Profile() {
-    const { user } = useAuthStore()
+    const { user, logout } = useAuthStore()
+    const navigate = useNavigate()
     const { pages } = usePageStore()
     const { tasks } = useTaskStore()
 
@@ -19,6 +21,11 @@ export default function Profile() {
     const completedTasks = tasks.filter(t => t.completed).length
     const totalTasks = tasks.length
     const totalPages = pages.length
+
+    const handleLogout = async () => {
+        await logout()
+        navigate('/')
+    }
 
     return (
         <div style={{ maxWidth: 860, margin: '0 auto', padding: '48px 96px', width: '100%', overflowY: 'auto' }}>
@@ -52,9 +59,31 @@ export default function Profile() {
                     <h2 style={{ fontSize: 24, fontWeight: 600, margin: '0 0 4px', color: 'var(--text-primary)' }}>
                         {user.displayName || 'User'}
                     </h2>
-                    <div style={{ color: 'var(--text-secondary)', fontSize: 15 }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: 15, marginBottom: 12 }}>
                         {user.email}
                     </div>
+                    <button 
+                        onClick={handleLogout}
+                        style={{
+                            padding: '6px 16px',
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                            color: 'var(--danger, #ef4444)',
+                            borderRadius: 'var(--radius-md)',
+                            cursor: 'pointer',
+                            fontSize: 14,
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--danger, #ef4444)'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'; e.currentTarget.style.color = 'var(--danger, #ef4444)'; }}
+                    >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
+                        Log out
+                    </button>
                 </div>
             </div>
 
