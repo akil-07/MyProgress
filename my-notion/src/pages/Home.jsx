@@ -13,6 +13,7 @@ import TimetableCalculator from './TimetableCalculator.jsx'
 import Profile from './Profile.jsx'
 import Pomodoro from './Pomodoro.jsx'
 import RecordGenerator from './RecordGenerator.jsx'
+import MoodleActivity from './MoodleActivity.jsx'
 import usePageStore from '../store/pageStore.js'
 import { LiquidButton } from '../components/ui/liquid-glass-button.tsx'
 
@@ -53,6 +54,7 @@ export default function Home() {
                     <Route path="/timetable" element={<Timetable />} />
                     <Route path="/timetable-calc" element={<TimetableCalculator />} />
                     <Route path="/assignments" element={<Assignments />} />
+                    <Route path="/moodle" element={<MoodleActivity />} />
                     <Route path="/semester" element={<SemesterPlanner />} />
                     <Route path="/pomodoro" element={<Pomodoro />} />
                     <Route path="/profile" element={<Profile />} />

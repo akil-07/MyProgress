@@ -1,20 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { signOut } from 'firebase/auth'
 import { auth, isFirebaseConfigured } from '../../services/firebase.js'
 import usePageStore from '../../store/pageStore.js'
 import useTaskStore from '../../store/taskStore.js'
 import useAuthStore from '../../store/authStore.js'
+import useMoodleStore from '../../store/moodleStore.js'
 import SearchModal from '../Search/SearchModal.jsx'
 
 const EMOJIS = ['📄', '📝', '📌', '🗒️', '💡', '🎯', '🚀', '📚', '🗂️', '⭐', '🔥', '💎', '🌟', '🎨', '🏆', '🔖', '🧠', '✨', '🎪', '🌈', '🦋', '🦄', '🔬', '🍀', '🏔️', '🌊', '🎵', '🎮', '🌸', '🏄']
 
 export default function Sidebar() {
     const navigate = useNavigate()
+    const location = useLocation()
     const { pageId } = useParams()
     const { pages, createPage, deletePage, updatePage, setActivePage } = usePageStore()
     const { tasks } = useTaskStore()
     const { user } = useAuthStore()
+    const moodlePending = useMoodleStore(state => state.snapshot?.summary?.pendingAssignments || 0)
     const pendingTasks = tasks.filter(t => !t.completed).length
 
     const handleLogout = async () => {
@@ -115,6 +118,13 @@ export default function Sidebar() {
                     <button className="sidebar-nav-item" onClick={() => navigate('/assignments')}>
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
                         <span>Assignments</span>
+                    </button>
+                    <button className={`sidebar-nav-item${location.pathname === '/moodle' ? ' active' : ''}`} onClick={() => navigate('/moodle')}>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" /><path d="M8 7h8" /><path d="M8 11h8" /><path d="M8 15h5" /></svg>
+                        <span>Moodle Activity</span>
+                        {moodlePending > 0 && (
+                            <span style={{ marginLeft: 'auto', background: 'var(--accent)', color: '#fff', fontSize: 10, fontWeight: 700, borderRadius: 99, padding: '1px 7px', minWidth: 18, textAlign: 'center' }}>{moodlePending}</span>
+                        )}
                     </button>
                     <button className="sidebar-nav-item" onClick={() => navigate('/record-generator')}>
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><circle cx="12" cy="12" r="3" /></svg>
