@@ -227,6 +227,12 @@
   gap: 20px;
 }
 
+.moodle-vertical-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
 .moodle-panel {
   padding: 22px;
 }

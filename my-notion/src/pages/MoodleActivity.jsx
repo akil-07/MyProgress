@@ -398,8 +398,19 @@ export default function MoodleActivity() {
                                 <StatCard label="Due Soon" value={selectedCourse.metrics.dueSoonAssignments} hint="Approaching deadlines" />
                             </section>
 
-                            <div className="moodle-main-grid">
-                                <section className="moodle-panel" style={{ flex: 1, minWidth: 0 }}>
+                            <div className="moodle-vertical-stack">
+                                <section className="moodle-panel">
+                                    <div className="moodle-panel-heading">
+                                        <div>
+                                            <h2>Upcoming in {selectedCourse.shortName || 'Course'}</h2>
+                                            <p>Deadlines and events specifically for this course.</p>
+                                        </div>
+                                    </div>
+
+                                    <EventList events={snapshot.events.filter(e => e.courseId === selectedCourse.id)} />
+                                </section>
+
+                                <section className="moodle-panel">
                                     <div className="moodle-panel-heading moodle-panel-heading-wrap">
                                         <div>
                                             <h2>Work queue</h2>
@@ -427,17 +438,6 @@ export default function MoodleActivity() {
                                     )}
 
                                     <AssignmentList assignments={filteredAssignments} />
-                                </section>
-
-                                <section className="moodle-panel moodle-panel-side">
-                                    <div className="moodle-panel-heading">
-                                        <div>
-                                            <h2>Upcoming in {selectedCourse.shortName || 'Course'}</h2>
-                                            <p>Deadlines and events specifically for this course.</p>
-                                        </div>
-                                    </div>
-
-                                    <EventList events={snapshot.events.filter(e => e.courseId === selectedCourse.id)} />
                                 </section>
                             </div>
                         </>
