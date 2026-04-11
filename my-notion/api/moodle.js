@@ -245,7 +245,19 @@ async function getUpcomingEvents(token, courseNameById, assignments, nowInSecond
                 description: cleanHtml(event.description),
                 url: event.url || null,
                 overdue: Boolean(event.timestart && event.timestart < nowInSeconds),
-            })),
+            })).filter(event => {
+                const nameStr = event.title.toLowerCase();
+                 return (
+                    nameStr.includes('poodll') ||
+                    nameStr.includes('poodl') ||
+                    nameStr.includes('exercise') ||
+                    nameStr.match(/\bex\b/) ||
+                    nameStr.includes('exp-') ||
+                    nameStr.match(/\bexp\b/) ||
+                    nameStr.includes('skill assess') ||
+                    nameStr.includes('skill asses')
+                );
+            }),
         }
     } catch {
         return {
@@ -298,19 +310,33 @@ export default async function handler(req, res) {
             : { courses: [] }
 
         const rawAssignments = (assignmentsPayload?.courses || []).flatMap(courseEntry => (
-            (courseEntry.assignments || []).map(assignment => ({
-                id: assignment.id,
-                courseId: courseEntry.id,
-                courseName: courseNameById.get(courseEntry.id) || courseEntry.fullname || `Course ${courseEntry.id}`,
-                name: assignment.name || 'Untitled assignment',
-                intro: cleanHtml(assignment.intro),
-                duedate: Number(assignment.duedate || 0),
-                dueAt: toIsoDate(assignment.duedate),
-                cutoffAt: toIsoDate(assignment.cutoffdate),
-                unlockAt: toIsoDate(assignment.allowsubmissionsfromdate),
-                maxAttempts: assignment.maxattempts,
-                gradingMethod: assignment.markingworkflow ? 'workflow' : 'standard',
-            }))
+            (courseEntry.assignments || [])
+                .map(assignment => ({
+                    id: assignment.id,
+                    courseId: courseEntry.id,
+                    courseName: courseNameById.get(courseEntry.id) || courseEntry.fullname || `Course ${courseEntry.id}`,
+                    name: assignment.name || 'Untitled assignment',
+                    intro: cleanHtml(assignment.intro),
+                    duedate: Number(assignment.duedate || 0),
+                    dueAt: toIsoDate(assignment.duedate),
+                    cutoffAt: toIsoDate(assignment.cutoffdate),
+                    unlockAt: toIsoDate(assignment.allowsubmissionsfromdate),
+                    maxAttempts: assignment.maxattempts,
+                    gradingMethod: assignment.markingworkflow ? 'workflow' : 'standard',
+                }))
+                .filter(assignment => {
+                    const nameStr = assignment.name.toLowerCase();
+                    return (
+                        nameStr.includes('poodll') ||
+                        nameStr.includes('poodl') ||
+                        nameStr.includes('exercise') ||
+                        nameStr.match(/\bex\b/) ||
+                        nameStr.includes('exp-') ||
+                        nameStr.match(/\bexp\b/) ||
+                        nameStr.includes('skill assess') ||
+                        nameStr.includes('skill asses')
+                    );
+                })
         ))
 
         const assignmentsForStatus = rawAssignments
