@@ -1,3 +1,6 @@
+// Disable strict SSL verification for internal university services on Vercel
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+
 const DEFAULT_BASE_URL = process.env.MOODLE_BASE_URL || 'https://lms2.ai.saveetha.in'
 const STATUS_LOOKBACK_SECONDS = 60 * 24 * 60 * 60
 const STATUS_LOOKAHEAD_SECONDS = 150 * 24 * 60 * 60
