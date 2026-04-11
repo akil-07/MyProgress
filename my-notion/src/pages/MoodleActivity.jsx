@@ -86,7 +86,7 @@ function StatCard({ label, value, hint }) {
     )
 }
 
-function CourseCard({ course }) {
+function CourseCard({ course, onClick }) {
     const { metrics } = course
     const progressWidth = Math.max(0, Math.min(metrics.progressPercent || 0, 100))
     const summary = metrics.hasCompletionTracking
@@ -94,7 +94,7 @@ function CourseCard({ course }) {
         : `${metrics.submittedAssignments} of ${metrics.totalAssignments} assignments submitted`
 
     return (
-        <article className="moodle-course-card">
+        <article className="moodle-course-card" onClick={onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
             <div className="moodle-course-header">
                 <div>
                     <h3>{course.name}</h3>
@@ -207,6 +207,7 @@ export default function MoodleActivity() {
     const [tokenInput, setTokenInput] = useState(token)
     const [showToken, setShowToken] = useState(false)
     const [filter, setFilter] = useState('all')
+    const [selectedCourseId, setSelectedCourseId] = useState(null)
 
     useEffect(() => {
         setTokenInput(token)
@@ -222,7 +223,12 @@ export default function MoodleActivity() {
         const list = snapshot?.assignments || []
 
         return list
-            .filter(assignment => matchesFilter(assignment, filter))
+            .filter(assignment => {
+                if (selectedCourseId && assignment.courseId !== selectedCourseId) {
+                    return false
+                }
+                return matchesFilter(assignment, filter)
+            })
             .sort((left, right) => {
                 const leftDue = left.duedate || Number.MAX_SAFE_INTEGER
                 const rightDue = right.duedate || Number.MAX_SAFE_INTEGER
@@ -257,10 +263,12 @@ export default function MoodleActivity() {
         setTokenInput('')
         setShowToken(false)
         setFilter('all')
+        setSelectedCourseId(null)
     }
 
     const summary = snapshot?.summary
     const coverage = snapshot?.meta?.assignmentStatusCoverage
+    const selectedCourse = snapshot?.courses.find(c => c.id === selectedCourseId) || null
 
     return (
         <div className="page-container moodle-page">
@@ -340,70 +348,102 @@ export default function MoodleActivity() {
 
             {snapshot && (
                 <>
-                    <section className="moodle-stats-grid">
-                        <StatCard label="Subjects" value={summary.totalCourses} hint="Enrolled courses synced" />
-                        <StatCard label="Remaining" value={summary.remainingWork} hint="Open work still left" />
-                        <StatCard label="Submitted" value={summary.submittedAssignments} hint="Assignments already turned in" />
-                        <StatCard label="Upcoming" value={summary.upcomingEvents} hint="Events and deadlines ahead" />
-                    </section>
+                    {!selectedCourse ? (
+                        <>
+                            <section className="moodle-stats-grid">
+                                <StatCard label="Subjects" value={summary.totalCourses} hint="Enrolled courses synced" />
+                                <StatCard label="Remaining" value={summary.remainingWork} hint="Open work still left" />
+                                <StatCard label="Submitted" value={summary.submittedAssignments} hint="Assignments already turned in" />
+                                <StatCard label="Upcoming" value={summary.upcomingEvents} hint="Events and deadlines ahead" />
+                            </section>
 
-                    <div className="moodle-main-grid">
-                        <section className="moodle-panel">
-                            <div className="moodle-panel-heading">
-                                <div>
-                                    <h2>Subjects</h2>
-                                    <p>Progress per course using tracked Moodle work when available.</p>
-                                </div>
+                            <div className="moodle-main-grid">
+                                <section className="moodle-panel" style={{ gridColumn: '1 / -1' }}>
+                                    <div className="moodle-panel-heading">
+                                        <div>
+                                            <h2>Subjects</h2>
+                                            <p>Select a subject to view its assignments and deadlines.</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="moodle-course-grid">
+                                        {snapshot.courses
+                                            .slice()
+                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                            .map(course => (
+                                                <CourseCard 
+                                                    key={course.id} 
+                                                    course={course} 
+                                                    onClick={() => setSelectedCourseId(course.id)} 
+                                                />
+                                        ))}
+                                    </div>
+                                </section>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="moodle-subject-header">
+                                <button className="moodle-button moodle-button-secondary" onClick={() => setSelectedCourseId(null)}>
+                                    &larr; Back to Subjects
+                                </button>
+                                <h2>{selectedCourse.name}</h2>
+                                <p>{selectedCourse.shortName || selectedCourse.categoryName}</p>
                             </div>
 
-                            <div className="moodle-course-grid">
-                                {snapshot.courses.map(course => (
-                                    <CourseCard key={course.id} course={course} />
-                                ))}
+                            <section className="moodle-stats-grid">
+                                <StatCard label="Total Work" value={selectedCourse.metrics.totalAssignments} hint="Overall assignments" />
+                                <StatCard label="Remaining" value={selectedCourse.metrics.remainingWork} hint="Open work still left" />
+                                <StatCard label="Submitted" value={selectedCourse.metrics.submittedAssignments} hint="Assignments turned in" />
+                                <StatCard label="Due Soon" value={selectedCourse.metrics.dueSoonAssignments} hint="Approaching deadlines" />
+                            </section>
+
+                            <div className="moodle-main-grid">
+                                <section className="moodle-panel moodle-panel-side">
+                                    <div className="moodle-panel-heading">
+                                        <div>
+                                            <h2>Upcoming in {selectedCourse.shortName || 'Course'}</h2>
+                                            <p>Deadlines and events specifically for this course.</p>
+                                        </div>
+                                    </div>
+
+                                    <EventList events={snapshot.events.filter(e => e.courseId === selectedCourse.id)} />
+                                </section>
+                                
+                                <section className="moodle-panel" style={{ flex: 1, minWidth: 0 }}>
+                                    <div className="moodle-panel-heading moodle-panel-heading-wrap">
+                                        <div>
+                                            <h2>Work queue</h2>
+                                            <p>Assignments and tasks for this subject.</p>
+                                        </div>
+
+                                        <div className="moodle-filter-row">
+                                            {FILTERS.map(item => (
+                                                <button
+                                                    key={item}
+                                                    className={`moodle-filter-chip${filter === item ? ' active' : ''}`}
+                                                    onClick={() => setFilter(item)}
+                                                    type="button"
+                                                >
+                                                    {item}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {coverage && (
+                                        <p className="moodle-coverage-note">
+                                            Submission status loaded for {coverage.loaded} of {coverage.total} assignments globally.
+                                        </p>
+                                    )}
+
+                                    <AssignmentList assignments={filteredAssignments} />
+                                </section>
                             </div>
-                        </section>
+                        </>
+                    )}
 
-                        <section className="moodle-panel moodle-panel-side">
-                            <div className="moodle-panel-heading">
-                                <div>
-                                    <h2>Upcoming</h2>
-                                    <p>{snapshot.meta?.calendarSource === 'moodle' ? 'Pulled from calendar actions.' : 'Built from upcoming assignment deadlines.'}</p>
-                                </div>
-                            </div>
 
-                            <EventList events={snapshot.events} />
-                        </section>
-                    </div>
-
-                    <section className="moodle-panel">
-                        <div className="moodle-panel-heading moodle-panel-heading-wrap">
-                            <div>
-                                <h2>Work queue</h2>
-                                <p>See what is done, what is pending, and what needs attention next.</p>
-                            </div>
-
-                            <div className="moodle-filter-row">
-                                {FILTERS.map(item => (
-                                    <button
-                                        key={item}
-                                        className={`moodle-filter-chip${filter === item ? ' active' : ''}`}
-                                        onClick={() => setFilter(item)}
-                                        type="button"
-                                    >
-                                        {item}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {coverage && (
-                            <p className="moodle-coverage-note">
-                                Submission status loaded for {coverage.loaded} of {coverage.total} assignments.
-                            </p>
-                        )}
-
-                        <AssignmentList assignments={filteredAssignments} />
-                    </section>
                 </>
             )}
         </div>

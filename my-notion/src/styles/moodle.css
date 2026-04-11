@@ -231,6 +231,23 @@
   padding: 22px;
 }
 
+.moodle-subject-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.moodle-subject-header h2 {
+  font-size: 28px;
+  margin-top: 8px;
+}
+
+.moodle-subject-header p {
+  color: var(--text-secondary);
+}
+
 .moodle-panel-side {
   align-self: start;
 }
