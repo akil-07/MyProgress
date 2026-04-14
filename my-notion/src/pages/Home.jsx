@@ -13,6 +13,7 @@ import TimetableCalculator from './TimetableCalculator.jsx'
 import Profile from './Profile.jsx'
 import Pomodoro from './Pomodoro.jsx'
 import RecordGenerator from './RecordGenerator.jsx'
+import ClashPlanner from './ClashPlanner.jsx'
 import MoodleActivity from './MoodleActivity.jsx'
 import usePageStore from '../store/pageStore.js'
 import { LiquidButton } from '../components/ui/liquid-glass-button.tsx'
@@ -59,6 +60,7 @@ export default function Home() {
                     <Route path="/pomodoro" element={<Pomodoro />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/record-generator" element={<RecordGenerator />} />
+                    <Route path="/clash-planner" element={<ClashPlanner />} />
                 </Routes>
             </main>
 

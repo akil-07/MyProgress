@@ -84,6 +84,77 @@ const useAcademicStore = create((set, get) => ({
         set({ timetableRooms: newRooms })
     },
 
+    bulkImportTimetable: (importedTimetable) => {
+        const idFn = () => Math.random().toString(36).slice(2) + Date.now().toString(36);
+        const daysMap = { 'MON': 1, 'TUE': 2, 'WED': 3, 'THU': 4, 'FRI': 5, 'SAT': 6 };
+        
+        const newTimetable = {
+            1: [null, null, 'lunch', null, null],
+            2: [null, null, 'lunch', null, null],
+            3: [null, null, 'lunch', null, null],
+            4: [null, null, 'lunch', null, null],
+            5: [null, null, 'lunch', null, null],
+            6: [null, null, 'lunch', null, null]
+        };
+        const newRooms = {};
+        for (let i=1; i<=6; i++) newRooms[i] = [null, null, null, null, null];
+        
+        let updatedSubjects = [...get().subjects];
+        const colors = ['#7c5cfc', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ef4444'];
+        
+        importedTimetable.forEach((item, index) => {
+            const { subject, section } = item;
+            
+            let existingSub = updatedSubjects.find(s => 
+                (s.code && s.code === subject.code) || 
+                s.name.includes(subject.code) || 
+                s.name.toLowerCase() === subject.name.toLowerCase()
+            );
+            
+            if (!existingSub) {
+                existingSub = {
+                    id: idFn(),
+                    name: `${subject.code} - ${subject.name}`,
+                    code: subject.code,
+                    color: colors[index % colors.length],
+                    target: 80,
+                    conducted: 0, attended: 0,
+                    timetable: [1, 2, 3, 4, 5],
+                    excludedDates: []
+                };
+                updatedSubjects.push(existingSub);
+            }
+            
+            section.slots.forEach(slot => {
+                const dayId = daysMap[slot.day];
+                if (!dayId) return;
+                
+                let slotId = null;
+                if (slot.time.includes('08:00') || slot.time.includes('09:00')) slotId = 0;
+                else if (slot.time.includes('10:00') || slot.time.includes('11:00')) slotId = 1;
+                else if (slot.time.includes('13:00') || slot.time.includes('14:00')) slotId = 3;
+                else if (slot.time.includes('15:00') || slot.time.includes('16:00')) slotId = 4;
+                
+                if (slotId !== null) {
+                    newTimetable[dayId][slotId] = existingSub.id;
+                    if (slot.room && slot.room !== 'TBD') {
+                        newRooms[dayId][slotId] = slot.room;
+                    }
+                }
+            });
+        });
+        
+        subjectLS.save(updatedSubjects);
+        LS('mynotion_timetable').save(newTimetable);
+        LS('mynotion_timetableRooms').save(newRooms);
+        
+        set({
+            subjects: updatedSubjects,
+            timetable: newTimetable,
+            timetableRooms: newRooms
+        });
+    },
+
     // ════════════ ABSENCES ════════════
     absences: LS('mynotion_absences').load() || [], // { id, date, slot, subjectId }
     markAbsent: (date, slot, subjectId) => {

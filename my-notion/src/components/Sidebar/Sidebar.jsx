@@ -134,6 +134,10 @@ export default function Sidebar() {
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>
                         <span>Semester Planner</span>
                     </button>
+                    <button className="sidebar-nav-item" onClick={() => navigate('/clash-planner')}>
+                        <span style={{ width: 15, display: 'inline-flex', justifyContent: 'center', fontSize: 15 }}>📅</span>
+                        <span>Clash Planner</span>
+                    </button>
                 </nav>
 
                 {/* Pages label */}
