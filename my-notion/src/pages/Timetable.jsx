@@ -29,7 +29,24 @@ export default function Timetable() {
         if (!timetableRef.current) return
         
         try {
-            const canvas = await html2canvas(timetableRef.current, { scale: 2 })
+            const element = timetableRef.current;
+            const originalOverflow = element.style.overflowX;
+            const originalWidth = element.style.width;
+            
+            // Temporarily update styles so html2canvas captures entire content
+            element.style.overflowX = 'visible';
+            element.style.width = 'max-content';
+
+            const canvas = await html2canvas(element, { 
+                scale: 2, 
+                useCORS: true,
+                windowWidth: element.scrollWidth
+            })
+            
+            // Restore styles
+            element.style.overflowX = originalOverflow;
+            element.style.width = originalWidth;
+
             const imgData = canvas.toDataURL('image/png')
             const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
             

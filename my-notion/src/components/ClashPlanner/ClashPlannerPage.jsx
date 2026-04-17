@@ -1,26 +1,22 @@
-import React, { useState } from 'react';
+import React from 'react';
 import UploadStep from './UploadStep';
 import SubjectSelectStep from './SubjectSelectStep';
 import PreferencesStep from './PreferencesStep';
 import TimetableStep from './TimetableStep';
 import ConflictModal from './ConflictModal';
 import { detectInitialConflicts, generateTimetables } from './timetableGenerator';
+import useClashStore from '../../store/clashStore';
 
 export default function ClashPlannerPage() {
-    const [step, setStep] = useState(1);
-    
-    // State
-    const [allSubjects, setAllSubjects] = useState([]);
-    const [selectedSubjects, setSelectedSubjects] = useState([]);
-    const [preferences, setPreferences] = useState({
-        leaveDays: [],
-        staffPrefs: {},
-        timePref: 'NO_PREF'
-    });
-    
-    const [combinations, setCombinations] = useState([]);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const [conflicts, setConflicts] = useState([]);
+    const { 
+        step, setStep, 
+        allSubjects, setAllSubjects, 
+        selectedSubjects, setSelectedSubjects, 
+        preferences, setPreferences, 
+        combinations, setCombinations, 
+        isGenerating, setIsGenerating, 
+        conflicts, setConflicts 
+    } = useClashStore();
 
     const handleParsed = (subjects) => {
         setAllSubjects(subjects);

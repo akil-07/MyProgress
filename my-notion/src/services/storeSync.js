@@ -3,6 +3,8 @@ import { db } from './firebase.js'
 import usePageStore from '../store/pageStore.js'
 import useTaskStore from '../store/taskStore.js'
 import useAcademicStore from '../store/academicStore.js'
+import useClashStore from '../store/clashStore.js'
+import useMoodleStore from '../store/moodleStore.js'
 
 let syncTimeout = null
 
@@ -40,6 +42,36 @@ export async function loadUserData(uid) {
                     // Ignore LS errors
                 }
             }
+            if (data.clashPlanner) {
+                useClashStore.setState({
+                    step: data.clashPlanner.step || 1,
+                    allSubjects: data.clashPlanner.allSubjects || [],
+                    selectedSubjects: data.clashPlanner.selectedSubjects || [],
+                    preferences: data.clashPlanner.preferences || { leaveDays: [], staffPrefs: {}, timePref: 'NO_PREF' },
+                    combinations: data.clashPlanner.combinations || [],
+                    conflicts: data.clashPlanner.conflicts || []
+                })
+                
+                try {
+                    localStorage.setItem('mynotion_clash_planner', JSON.stringify(data.clashPlanner))
+                } catch (e) {
+                    // Ignore LS errors
+                }
+            }
+            if (data.moodleToken) {
+                useMoodleStore.setState({ token: data.moodleToken });
+                try {
+                    localStorage.setItem('mynotion_moodle_token', data.moodleToken);
+                    
+                    // Trigger a moodle sync if we have a token but no snapshot yet
+                    const currentSnapshot = useMoodleStore.getState().snapshot;
+                    if (!currentSnapshot) {
+                        useMoodleStore.getState().syncMoodle(data.moodleToken).catch(console.error);
+                    }
+                } catch (e) {
+                    // Ignore
+                }
+            }
         } else {
             // New user, save initial local state to firestore
             await saveUserData(uid)
@@ -55,11 +87,14 @@ export function saveUserData(uid) {
     const pages = usePageStore.getState().pages
     const { tasks, streak } = useTaskStore.getState()
     const academic = useAcademicStore.getState()
+    const clash = useClashStore.getState()
+    const moodleToken = useMoodleStore.getState().token
 
     const data = {
         pages,
         tasks,
         streak,
+        moodleToken,
         academic: {
             subjects: academic.subjects,
             semester: academic.semester,
@@ -68,6 +103,14 @@ export function saveUserData(uid) {
             timetableRooms: academic.timetableRooms,
             absences: academic.absences,
             hoursPerClass: academic.hoursPerClass
+        },
+        clashPlanner: {
+            step: clash.step,
+            allSubjects: clash.allSubjects,
+            selectedSubjects: clash.selectedSubjects,
+            preferences: clash.preferences,
+            combinations: clash.combinations,
+            conflicts: clash.conflicts
         },
         updatedAt: new Date().toISOString()
     }
@@ -79,7 +122,7 @@ export function setupSync(uid) {
     if (!uid) return () => { }
 
     // Subscribe to all stores
-    const unsubs = [usePageStore, useTaskStore, useAcademicStore].map(store =>
+    const unsubs = [usePageStore, useTaskStore, useAcademicStore, useClashStore, useMoodleStore].map(store =>
         store.subscribe(() => {
             clearTimeout(syncTimeout)
             syncTimeout = setTimeout(() => saveUserData(uid), 1500)
