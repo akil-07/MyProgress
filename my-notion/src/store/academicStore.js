@@ -1,13 +1,5 @@
 import { create } from 'zustand'
 
-/* ── helpers ─────────────────────────────────────────── */
-const LS = (key) => ({ load: () => { try { return JSON.parse(localStorage.getItem(key)) } catch { return null } }, save: (v) => localStorage.setItem(key, JSON.stringify(v)) })
-
-const subjectLS = LS('mynotion_subjects')
-const attendLS = LS('mynotion_attendance')
-const assignLS = LS('mynotion_assignments')
-const semesterLS = LS('mynotion_semester')
-
 function id() { return Math.random().toString(36).slice(2) + Date.now().toString(36) }
 function todayStr() { return new Date().toISOString().slice(0, 10) }
 
@@ -23,7 +15,7 @@ const DEFAULT_SEMESTER = {
 const useAcademicStore = create((set, get) => ({
 
     /* ════════════ SUBJECTS / ATTENDANCE CALCULATOR ════════════════ */
-    subjects: subjectLS.load() || DEFAULT_SUBJECTS,
+    subjects: DEFAULT_SUBJECTS,
 
     addSubject: (name, color = '#7c5cfc', target = 80) => {
         const s = {
@@ -33,24 +25,21 @@ const useAcademicStore = create((set, get) => ({
             excludedDates: [],
         }
         const subjects = [...get().subjects, s]
-        subjectLS.save(subjects)
         set({ subjects })
     },
 
     removeSubject: (subjectId) => {
         const subjects = get().subjects.filter(s => s.id !== subjectId)
-        subjectLS.save(subjects)
         set({ subjects })
     },
 
     updateSubject: (subjectId, data) => {
         const subjects = get().subjects.map(s => s.id === subjectId ? { ...s, ...data } : s)
-        subjectLS.save(subjects)
         set({ subjects })
     },
 
     // ════════════ TIMETABLE ════════════
-    timetable: LS('mynotion_timetable').load() || {
+    timetable: {
         1: [null, null, 'lunch', null, null],
         2: [null, null, 'lunch', null, null],
         3: [null, null, 'lunch', null, null],
@@ -58,7 +47,7 @@ const useAcademicStore = create((set, get) => ({
         5: [null, null, 'lunch', null, null],
         6: [null, null, 'lunch', null, null]
     },
-    timetableRooms: LS('mynotion_timetableRooms').load() || {
+    timetableRooms: {
         1: [null, null, null, null, null],
         2: [null, null, null, null, null],
         3: [null, null, null, null, null],
@@ -71,7 +60,6 @@ const useAcademicStore = create((set, get) => ({
         const daySlots = [...newTimetable[day]]
         daySlots[slot] = subjectId
         newTimetable[day] = daySlots
-        LS('mynotion_timetable').save(newTimetable)
         set({ timetable: newTimetable })
     },
     updateTimetableRoom: (day, slot, room) => {
@@ -80,7 +68,6 @@ const useAcademicStore = create((set, get) => ({
         const daySlots = [...newRooms[day]]
         daySlots[slot] = room
         newRooms[day] = daySlots
-        LS('mynotion_timetableRooms').save(newRooms)
         set({ timetableRooms: newRooms })
     },
 
@@ -144,10 +131,6 @@ const useAcademicStore = create((set, get) => ({
             });
         });
         
-        subjectLS.save(updatedSubjects);
-        LS('mynotion_timetable').save(newTimetable);
-        LS('mynotion_timetableRooms').save(newRooms);
-        
         set({
             subjects: updatedSubjects,
             timetable: newTimetable,
@@ -156,25 +139,22 @@ const useAcademicStore = create((set, get) => ({
     },
 
     // ════════════ ABSENCES ════════════
-    absences: LS('mynotion_absences').load() || [], // { id, date, slot, subjectId }
+    absences: [], // { id, date, slot, subjectId }
     markAbsent: (date, slot, subjectId) => {
         const abs = [...get().absences]
         if (!abs.find(a => a.date === date && a.slot === slot && a.subjectId === subjectId)) {
             abs.push({ id: id(), date, slot, subjectId })
-            LS('mynotion_absences').save(abs)
             set({ absences: abs })
         }
     },
     removeAbsent: (date, slot, subjectId) => {
         const abs = get().absences.filter(a => !(a.date === date && a.slot === slot && a.subjectId === subjectId))
-        LS('mynotion_absences').save(abs)
         set({ absences: abs })
     },
 
     // ════════════ CONFIG ════════════
-    hoursPerClass: LS('mynotion_hpc').load() || 2,
+    hoursPerClass: 2,
     setHoursPerClass: (h) => {
-        LS('mynotion_hpc').save(h)
         set({ hoursPerClass: h })
     },
 
@@ -278,7 +258,7 @@ const useAcademicStore = create((set, get) => ({
     },
 
     /* ════════════ ASSIGNMENTS ═══════════════════════════ */
-    assignments: assignLS.load() || [],
+    assignments: [],
 
     addAssignment: (data) => {
         const a = {
@@ -292,49 +272,42 @@ const useAcademicStore = create((set, get) => ({
             createdAt: new Date().toISOString(),
         }
         const assignments = [a, ...get().assignments]
-        assignLS.save(assignments)
         set({ assignments })
     },
 
     updateAssignment: (id, data) => {
         const assignments = get().assignments.map(a => a.id === id ? { ...a, ...data } : a)
-        assignLS.save(assignments)
         set({ assignments })
     },
 
     deleteAssignment: (id) => {
         const assignments = get().assignments.filter(a => a.id !== id)
-        assignLS.save(assignments)
         set({ assignments })
     },
 
     /* ════════════ SEMESTER PLANNER ══════════════════════ */
-    semester: semesterLS.load() || DEFAULT_SEMESTER,
+    semester: DEFAULT_SEMESTER,
 
     updateSemester: (data) => {
         const semester = { ...get().semester, ...data }
-        semesterLS.save(semester)
         set({ semester })
     },
 
     addEvent: (event) => {
         const e = { id: id(), ...event }
         const semester = { ...get().semester, events: [...(get().semester.events || []), e] }
-        semesterLS.save(semester)
         set({ semester })
     },
 
     updateEvent: (eventId, data) => {
         const events = (get().semester.events || []).map(e => e.id === eventId ? { ...e, ...data } : e)
         const semester = { ...get().semester, events }
-        semesterLS.save(semester)
         set({ semester })
     },
 
     deleteEvent: (eventId) => {
         const events = (get().semester.events || []).filter(e => e.id !== eventId)
         const semester = { ...get().semester, events }
-        semesterLS.save(semester)
         set({ semester })
     },
 }))

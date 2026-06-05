@@ -31,7 +31,7 @@ export default function RecordGenerator() {
     const [courseTitle, setCourseTitle] = useState('19EY708 - Career Development And Skills')
     const [studentName, setStudentName] = useState('')
     const [registerNumber, setRegisterNumber] = useState('')
-    const [date, setDate] = useState(new Date().toISOString().split('T')[0]) // Automatically sets today's date
+    const [date, setDate] = useState('') // Blank by default, can be filled if needed
     
     // Repos data (flattened for easy editing)
     const [repos, setRepos] = useState([])

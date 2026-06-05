@@ -8,86 +8,110 @@ import useMoodleStore from '../store/moodleStore.js'
 
 let syncTimeout = null
 
+// ── Guard: prevent saving to Firebase BEFORE initial load completes ──────────
+// This prevents a race condition where setupSync fires before loadUserData
+// finishes and overwrites Firebase data with empty local store state.
+let _dataLoaded = false
+
+export function isDataLoaded() { return _dataLoaded }
+
 export async function loadUserData(uid) {
-    if (!db) return
+    if (!db) {
+        console.warn('[storeSync] Firestore not initialized — skipping load.')
+        return
+    }
+    _dataLoaded = false
     try {
+        console.log('[storeSync] Loading user data for uid:', uid)
         const docRef = doc(db, 'users', uid)
         const snap = await getDoc(docRef)
 
         if (snap.exists()) {
             const data = snap.data()
+            console.log('[storeSync] Firebase data loaded:', {
+                hasPages: !!data.pages,
+                hasTasks: !!data.tasks,
+                hasAcademic: !!data.academic,
+                subjectsCount: data.academic?.subjects?.length ?? 0,
+                hasTimetable: !!data.academic?.timetable
+            })
+
             if (data.pages) usePageStore.setState({ pages: data.pages })
-            if (data.tasks) useTaskStore.setState({ tasks: data.tasks, streak: data.streak || useTaskStore.getState().streak })
-            if (data.academic) {
-                useAcademicStore.setState({
-                    subjects: data.academic.subjects || [],
-                    semester: data.academic.semester || {},
-                    assignments: data.academic.assignments || [],
-                    timetable: data.academic.timetable || useAcademicStore.getState().timetable,
-                    timetableRooms: data.academic.timetableRooms || useAcademicStore.getState().timetableRooms,
-                    absences: data.academic.absences || [],
-                    hoursPerClass: data.academic.hoursPerClass || useAcademicStore.getState().hoursPerClass
+
+            if (data.tasks) {
+                useTaskStore.setState({
+                    tasks: data.tasks,
+                    streak: data.streak || useTaskStore.getState().streak
                 })
-                
-                // Keep local storage in sync as well
-                try {
-                    if (data.academic.subjects) localStorage.setItem('mynotion_subjects', JSON.stringify(data.academic.subjects))
-                    if (data.academic.semester) localStorage.setItem('mynotion_semester', JSON.stringify(data.academic.semester))
-                    if (data.academic.assignments) localStorage.setItem('mynotion_assignments', JSON.stringify(data.academic.assignments))
-                    if (data.academic.timetable) localStorage.setItem('mynotion_timetable', JSON.stringify(data.academic.timetable))
-                    if (data.academic.timetableRooms) localStorage.setItem('mynotion_timetableRooms', JSON.stringify(data.academic.timetableRooms))
-                    if (data.academic.absences) localStorage.setItem('mynotion_absences', JSON.stringify(data.academic.absences))
-                    if (data.academic.hoursPerClass) localStorage.setItem('mynotion_hpc', JSON.stringify(data.academic.hoursPerClass))
-                } catch (e) {
-                    // Ignore LS errors
-                }
             }
+
+            if (data.academic) {
+                const ac = data.academic
+                useAcademicStore.setState({
+                    subjects:       ac.subjects      ?? useAcademicStore.getState().subjects,
+                    semester:       ac.semester      ?? useAcademicStore.getState().semester,
+                    assignments:    ac.assignments   ?? useAcademicStore.getState().assignments,
+                    timetable:      ac.timetable     ?? useAcademicStore.getState().timetable,
+                    timetableRooms: ac.timetableRooms ?? useAcademicStore.getState().timetableRooms,
+                    absences:       ac.absences      ?? useAcademicStore.getState().absences,
+                    hoursPerClass:  ac.hoursPerClass ?? useAcademicStore.getState().hoursPerClass,
+                })
+
+                // Keep local storage in sync (removed per user request - use only Firebase)
+            }
+
             if (data.clashPlanner) {
                 useClashStore.setState({
-                    step: data.clashPlanner.step || 1,
-                    allSubjects: data.clashPlanner.allSubjects || [],
+                    step:             data.clashPlanner.step             || 1,
+                    allSubjects:      data.clashPlanner.allSubjects      || [],
                     selectedSubjects: data.clashPlanner.selectedSubjects || [],
-                    preferences: data.clashPlanner.preferences || { leaveDays: [], staffPrefs: {}, timePref: 'NO_PREF' },
-                    combinations: data.clashPlanner.combinations || [],
-                    conflicts: data.clashPlanner.conflicts || []
+                    preferences:      data.clashPlanner.preferences      || { leaveDays: [], staffPrefs: {}, timePref: 'NO_PREF' },
+                    combinations:     data.clashPlanner.combinations     || [],
+                    conflicts:        data.clashPlanner.conflicts         || [],
                 })
-                
-                try {
-                    localStorage.setItem('mynotion_clash_planner', JSON.stringify(data.clashPlanner))
-                } catch (e) {
-                    // Ignore LS errors
-                }
+                // localStorage.setItem('mynotion_clash_planner', ...) removed
             }
+
             if (data.moodleToken) {
-                useMoodleStore.setState({ token: data.moodleToken });
+                useMoodleStore.setState({ token: data.moodleToken })
                 try {
-                    localStorage.setItem('mynotion_moodle_token', data.moodleToken);
-                    
-                    // Trigger a moodle sync if we have a token but no snapshot yet
-                    const currentSnapshot = useMoodleStore.getState().snapshot;
+                    const currentSnapshot = useMoodleStore.getState().snapshot
                     if (!currentSnapshot) {
-                        useMoodleStore.getState().syncMoodle(data.moodleToken).catch(console.error);
+                        useMoodleStore.getState().syncMoodle(data.moodleToken).catch(console.error)
                     }
-                } catch (e) {
-                    // Ignore
-                }
+                } catch (e) { /* ignore */ }
             }
+
         } else {
-            // New user, save initial local state to firestore
-            await saveUserData(uid)
+            // New user — save initial local state to Firestore
+            console.log('[storeSync] No Firebase data found for user — saving initial state.')
+            await saveUserData(uid, true)
         }
+
+        _dataLoaded = true
+        console.log('[storeSync] ✅ Data load complete.')
+
     } catch (e) {
-        console.error("Failed to load user data from Firestore", e)
+        console.error('[storeSync] ❌ Failed to load user data from Firestore:', e)
+        // Still mark as loaded so the app doesn't stay blocked
+        _dataLoaded = true
+        // Surface the error so users know something went wrong
+        throw e
     }
 }
 
-export function saveUserData(uid) {
+export function saveUserData(uid, force = false) {
     if (!db || !uid) return
+    // ── Guard: don't overwrite Firebase with empty local state during initial load ──
+    if (!force && !_dataLoaded) {
+        console.warn('[storeSync] Skipping save — initial Firebase load not complete yet.')
+        return
+    }
 
-    const pages = usePageStore.getState().pages
+    const pages      = usePageStore.getState().pages
     const { tasks, streak } = useTaskStore.getState()
-    const academic = useAcademicStore.getState()
-    const clash = useClashStore.getState()
+    const academic   = useAcademicStore.getState()
+    const clash      = useClashStore.getState()
     const moodleToken = useMoodleStore.getState().token
 
     const data = {
@@ -96,32 +120,32 @@ export function saveUserData(uid) {
         streak,
         moodleToken,
         academic: {
-            subjects: academic.subjects,
-            semester: academic.semester,
-            assignments: academic.assignments,
-            timetable: academic.timetable,
+            subjects:       academic.subjects,
+            semester:       academic.semester,
+            assignments:    academic.assignments,
+            timetable:      academic.timetable,
             timetableRooms: academic.timetableRooms,
-            absences: academic.absences,
-            hoursPerClass: academic.hoursPerClass
+            absences:       academic.absences,
+            hoursPerClass:  academic.hoursPerClass,
         },
         clashPlanner: {
-            step: clash.step,
-            allSubjects: clash.allSubjects,
+            step:             clash.step,
+            allSubjects:      clash.allSubjects,
             selectedSubjects: clash.selectedSubjects,
-            preferences: clash.preferences,
-            combinations: clash.combinations,
-            conflicts: clash.conflicts
+            preferences:      clash.preferences,
+            combinations:     clash.combinations,
+            conflicts:        clash.conflicts,
         },
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
     }
 
-    return setDoc(doc(db, 'users', uid), data, { merge: true }).catch(e => console.error("Failed to sync to Firestore", e))
+    return setDoc(doc(db, 'users', uid), data, { merge: true })
+        .catch(e => console.error('[storeSync] ❌ Failed to sync to Firestore:', e))
 }
 
 export function setupSync(uid) {
-    if (!uid) return () => { }
+    if (!uid) return () => {}
 
-    // Subscribe to all stores
     const unsubs = [usePageStore, useTaskStore, useAcademicStore, useClashStore, useMoodleStore].map(store =>
         store.subscribe(() => {
             clearTimeout(syncTimeout)
