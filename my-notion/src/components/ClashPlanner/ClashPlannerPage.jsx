@@ -19,6 +19,10 @@ export default function ClashPlannerPage() {
     } = useClashStore();
 
     const handleParsed = (subjects) => {
+        setSelectedSubjects([]);
+        setPreferences({ leaveDays: [], staffPrefs: {}, timePref: 'NO_PREF' });
+        setCombinations([]);
+        setConflicts([]);
         setAllSubjects(subjects);
         setStep(2);
     };
