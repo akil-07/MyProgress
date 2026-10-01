@@ -75,6 +75,31 @@ export default function TimetableStep({ combinations, onBack }) {
                         </div>
                     ))}
                 </div>
+
+                <div className="sniper-export" style={{ marginTop: '20px', padding: '15px', background: 'rgba(0, 0, 0, 0.2)', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                        <h5 style={{ margin: 0, color: '#fff', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            🎯 Extension Sniper Export
+                        </h5>
+                        <button 
+                            className="export-btn outline"
+                            style={{ padding: '6px 12px', fontSize: '12px', margin: 0 }}
+                            onClick={() => {
+                                const text = currentTimetable.map(item => `${item.subject.name} | ${item.section.name}`).join('\n');
+                                navigator.clipboard.writeText(text);
+                                // Optional: simple temporary visual feedback could go here
+                            }}
+                        >
+                            📋 Copy Format
+                        </button>
+                    </div>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: '#8892b0' }}>
+                        Paste this directly into the "Bulk Timetable Paste" box in the extension!
+                    </p>
+                    <pre style={{ margin: 0, padding: '12px', background: 'rgba(0, 0, 0, 0.3)', borderRadius: '6px', color: '#64ffda', fontSize: '13px', whiteSpace: 'pre-wrap', border: '1px dashed rgba(100, 255, 218, 0.3)' }}>
+                        {currentTimetable.map(item => `${item.subject.name} | ${item.section.name}`).join('\n')}
+                    </pre>
+                </div>
             </div>
 
             <div className="step-actions">
