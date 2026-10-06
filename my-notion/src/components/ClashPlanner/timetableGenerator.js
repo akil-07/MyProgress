@@ -75,14 +75,24 @@ export function generateTimetables(selectedSubjects, preferences) {
     const { leaveDays, staffPrefs, timePref } = preferences;
     const leaveSet = new Set(leaveDays);
 
-    // 1. Filter out sections that are on leave days
     const filteredSubjects = selectedSubjects.map(sub => {
-        const validSections = sub.sections.filter(sec => {
+        let validSections = sub.sections.filter(sec => {
             // Check leave days
             const hasLeaveDay = sec.slots.some(slot => leaveSet.has(slot.day));
             if (hasLeaveDay) return false;
             return true;
         });
+
+        // Strict Staff Filtering:
+        // If the user selected a preferred staff, we only keep sections with that staff.
+        if (staffPrefs && staffPrefs[sub.code] && staffPrefs[sub.code] !== 'NO_PREF') {
+            const prefStaffSections = validSections.filter(sec => sec.staff === staffPrefs[sub.code]);
+            // If filtering leaves us with valid options, apply the filter.
+            if (prefStaffSections.length > 0) {
+                validSections = prefStaffSections;
+            }
+        }
+
         return { ...sub, validSections };
     });
 
@@ -118,41 +128,43 @@ export function generateTimetables(selectedSubjects, preferences) {
 
     search(0, []);
 
-    // Cap combinations to prevent localStorage QuotaExceededError and UI freezing
-    // Randomize slightly or just take the first 500 before scoring
-    const cappedCombinations = combinations.length > 500 ? combinations.slice(0, 500) : combinations;
-
-    // 2. Score & Sort Combinations
-    cappedCombinations.sort((a, b) => {
-        let scoreA = 0, scoreB = 0;
-
-        const evalScore = (combo) => {
-            let s = 0;
-            combo.forEach(({ subject, section }) => {
-                // Staff preference check
-                if (staffPrefs[subject.code] === section.staff) {
-                    s += 10;
-                }
+    // 2. Score & Sort Combinations BEFORE capping
+    const evalScore = (combo) => {
+        let s = 0;
+        combo.forEach(({ subject, section }) => {
+            // Staff preference check (in case strict filter didn't apply due to conflicts)
+            if (staffPrefs && staffPrefs[subject.code] === section.staff) {
+                s += 10;
+            }
+            
+            // Time preference check
+            if (timePref && timePref !== 'NO_PREF') {
+                const isMor = section.slots.every(sl => timeToMins(sl.time.split('-')[0]) < 12 * 60);
+                const isAft = section.slots.every(sl => {
+                    const mins = timeToMins(sl.time.split('-')[0]);
+                    return mins >= 12 * 60 && mins < 16 * 60;
+                });
+                const isEve = section.slots.every(sl => timeToMins(sl.time.split('-')[0]) >= 16 * 60);
                 
-                // Time preference check
-                if (timePref && timePref !== 'NO_PREF') {
-                    const isMor = section.slots.every(sl => timeToMins(sl.time.split('-')[0]) < 12 * 60);
-                    const isAft = section.slots.every(sl => {
-                        const mins = timeToMins(sl.time.split('-')[0]);
-                        return mins >= 12 * 60 && mins < 16 * 60;
-                    });
-                    const isEve = section.slots.every(sl => timeToMins(sl.time.split('-')[0]) >= 16 * 60);
-                    
-                    if (timePref === 'MORNING' && isMor) s += 5;
-                    if (timePref === 'AFTERNOON' && isAft) s += 5;
-                    if (timePref === 'EVENING' && isEve) s += 5;
-                }
-            });
-            return s;
-        };
+                if (timePref === 'MORNING' && isMor) s += 5;
+                if (timePref === 'AFTERNOON' && isAft) s += 5;
+                if (timePref === 'EVENING' && isEve) s += 5;
+            }
+        });
+        return s;
+    };
 
-        return evalScore(b) - evalScore(a);
-    });
+    // Calculate score once per combination to speed up sorting
+    const scoredCombinations = combinations.map(combo => ({
+        combo,
+        score: evalScore(combo)
+    }));
+
+    scoredCombinations.sort((a, b) => b.score - a.score);
+
+    // 3. Cap combinations to prevent localStorage QuotaExceededError and UI freezing
+    const sortedCombinations = scoredCombinations.map(sc => sc.combo);
+    const cappedCombinations = sortedCombinations.length > 500 ? sortedCombinations.slice(0, 500) : sortedCombinations;
 
     return cappedCombinations;
 }
