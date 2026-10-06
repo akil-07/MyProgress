@@ -85,6 +85,12 @@ function parseSecFormat(lines) {
 
         // 3. Detect new section
         if (line.startsWith('UG -') || line.startsWith('PG -') || line.startsWith('SH -') || /^UG\s*-/.test(line)) {
+            // Ignore PHASE-1 reference sections
+            if (line.toUpperCase().includes('PHASE-1') || line.toUpperCase().includes('PHASE -1') || line.toUpperCase().includes('PHASE 1')) {
+                currentSection = null;
+                continue;
+            }
+
             // Example: "UG - 04, T2-G18, AI - Xavier Retin"
             const parts = line.split(',');
             const secName = parts[1] ? parts[1].trim() : 'Unknown';
