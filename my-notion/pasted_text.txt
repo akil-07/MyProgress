@@ -1,0 +1,243 @@
+19CS405 [4 Credits]
+PROFESSIONAL CORE - PROFESSIONAL CORE PC
+Course overview
+Operating System
+UG - 04, T2-T43, CSE - ARUL DALTON G
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 08:00 - 09:0009:00 - 10:00
+Saturday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-Q39, CSE - Sujatha Elumalai
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 13:00 - 14:0014:00 - 15:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 13:00 - 14:0014:00 - 15:00
+UG - 04, T2-P35, CSE - VIJAYAN P
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 13:00 - 14:0014:00 - 15:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 13:00 - 14:0014:00 - 15:00
+UG - 04, T2-M23, CSE - ARUL DALTON G
+Date: 08-10-2026 to 19-12-2026
+Monday: 13:00 - 14:0014:00 - 15:00
+Saturday: 13:00 - 14:0014:00 - 15:00
+Tuesday: 13:00 - 14:0014:00 - 15:00
+Wednesday: 13:00 - 14:0014:00 - 15:00
+UG - 04, T2-J27, CSE - Kolli Amos Daniel
+Date: 08-10-2026 to 19-12-2026
+Monday: 13:00 - 14:0014:00 - 15:00
+Saturday: 13:00 - 14:0014:00 - 15:00
+Tuesday: 13:00 - 14:0014:00 - 15:00
+Wednesday: 13:00 - 14:0014:00 - 15:00
+UG - 04, T2-E34, CSE - Sujatha Elumalai
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Monday: 10:00 - 11:0011:00 - 12:00
+Saturday: 13:00 - 14:0014:00 - 15:00
+Thursday: 08:00 - 09:0009:00 - 10:00
+UG - 04, T2-D30, CSE - VIJAYAN P
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Monday: 08:00 - 09:0009:00 - 10:00
+Saturday: 08:00 - 09:0009:00 - 10:00
+Wednesday: 08:00 - 09:0009:00 - 10:00
+UG - 04, PHASE-1, CSE - AIDS & AIML
+Date: 02-10-2026 to 02-10-2026
+Tuesday: 19:24 - 19:25
+UG - 04, T2-S27, CSE - Kolli Amos Daniel
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Saturday: 10:00 - 11:0011:00 - 12:00
+Tuesday: 15:00 - 16:0016:00 - 17:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+19AI405 [3 Credits]
+PROFESSIONAL CORE - PROFESSIONAL CORE PC
+Course overview
+Fundamentals of Artificial Intelligence
+UG - 04, PHASE-1, AI - AIDS & AIML
+Date: 02-10-2026 to 02-10-2026
+Monday: 17:36 - 17:37
+UG - 04, T2-U26, AI - Murugesan S
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Monday: 10:00 - 11:0011:00 - 12:00
+Thursday: 08:00 - 09:0009:00 - 10:00
+Wednesday: 08:00 - 09:0009:00 - 10:00
+UG - 04, T2-M22, AI - PREMNATH K
+Date: 08-10-2026 to 19-12-2026
+Friday: 13:00 - 14:0014:00 - 15:00
+Monday: 10:00 - 11:0011:00 - 12:00
+Saturday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-L23, AI - PUGALENTHI R
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Monday: 10:00 - 11:0011:00 - 12:00
+Thursday: 08:00 - 09:0009:00 - 10:00
+Wednesday: 08:00 - 09:0009:00 - 10:00
+UG - 04, T2-J24, AI - RAJALAKSHMI E
+Date: 08-10-2026 to 19-12-2026
+Friday: 13:00 - 14:0014:00 - 15:00
+Monday: 08:00 - 09:0009:00 - 10:00
+Saturday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-F29, AI - SUNITHA T
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 08:00 - 09:0009:00 - 10:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-E36, AI - YASHINI P
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 08:00 - 09:0009:00 - 10:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-D32, AI - Murugesan S
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 08:00 - 09:0009:00 - 10:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-D27, AI - PREMNATH K
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 13:00 - 14:0014:00 - 15:00
+Saturday: 13:00 - 14:0014:00 - 15:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-C32, AI - PUGALENTHI R
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 08:00 - 09:0009:00 - 10:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-C27, AI - RAJALAKSHMI E
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Monday: 13:00 - 14:0014:00 - 15:00
+Saturday: 13:00 - 14:0014:00 - 15:00
+Tuesday: 08:00 - 09:0009:00 - 10:00
+UG - 04, T2-A33, AI - YASHINI P
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Monday: 10:00 - 11:0011:00 - 12:00
+Thursday: 08:00 - 09:0009:00 - 10:00
+Wednesday: 08:00 - 09:0009:00 - 10:00
+UG - 04, T2-I26, AI - RAMSHANKAR N
+Date: 08-10-2026 to 19-12-2026
+Friday: 15:00 - 16:0016:00 - 17:00
+Saturday: 10:00 - 11:0011:00 - 12:00
+Thursday: 15:00 - 16:0016:00 - 17:00
+Tuesday: 08:00 - 09:0009:00 - 10:00
+UG - 04, T2-B27, AI - RAMSHANKAR N
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Saturday: 08:00 - 09:0009:00 - 10:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Tuesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-A37, AI - SUNITHA T
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Thursday: 08:00 - 09:0009:00 - 10:00
+Tuesday: 08:00 - 09:0009:00 - 10:00
+Wednesday: 08:00 - 09:0009:00 - 10:00
+19AI301 [3 Credits]
+ENGINEERING SCIENCES - ENGINEERING SCIENCES ES
+Course overview
+Python Programming
+UG - 04, PHASE-1, AI - AIDS & AIML
+Date: 02-10-2026 to 02-10-2026
+Monday: 17:20 - 17:21
+UG - 04, T2-G31, AI - Mariya Monica Celestina A
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Tuesday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 04, T2-G21, AI - GAYATHRI N
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Thursday: 08:00 - 09:0009:00 - 10:00
+Tuesday: 08:00 - 09:0009:00 - 10:00
+Wednesday: 08:00 - 09:0009:00 - 10:00
+UG - 04, T2-D24, AI - Mariya Monica Celestina A
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Thursday: 08:00 - 09:0009:00 - 10:00
+Tuesday: 08:00 - 09:0009:00 - 10:00
+Wednesday: 08:00 - 09:0009:00 - 10:00
+UG - 04, T2-J26, AI - GAYATHRI N
+Date: 08-10-2026 to 19-12-2026
+Friday: 10:00 - 11:0011:00 - 12:00
+Saturday: 15:00 - 16:0016:00 - 17:00
+Thursday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+19EY709 [1 Credits]
+EMPLOYABILITY ENHANCEMENT COURSES - EMPLOYABILITY ENHANCEMENT COURSES
+Course overview
+Reasoning Ability
+UG - 25, T2-T42, TRAINING - JAYPREETHA V R
+Date: 08-10-2026 to 19-12-2026
+Monday: 13:00 - 14:0014:00 - 15:00
+Wednesday: 13:00 - 14:0014:00 - 15:00
+UG - 25, T2-T39, TRAINING - MEGALA J
+Date: 08-10-2026 to 19-12-2026
+Monday: 15:00 - 16:0016:00 - 17:00
+Saturday: 15:00 - 16:0016:00 - 17:00
+UG - 25, T2-S39, TRAINING - Saranya V
+Date: 08-10-2026 to 19-12-2026
+Friday: 08:00 - 09:0009:00 - 10:00
+Monday: 10:00 - 11:0011:00 - 12:00
+UG - 25, T2-S37, TRAINING - Saranya V
+Date: 08-10-2026 to 19-12-2026
+Friday: 13:00 - 14:0014:00 - 15:00
+Monday: 13:00 - 14:0014:00 - 15:00
+UG - 25, T2-H35, TRAINING - JAYPREETHA V R
+Date: 08-10-2026 to 19-12-2026
+Monday: 15:00 - 16:0016:00 - 17:00
+Saturday: 15:00 - 16:0016:00 - 17:00
+UG - 25, T2-Q38, TRAINING - Sneha Priya p
+Date: 08-10-2026 to 19-12-2026
+Tuesday: 10:00 - 11:0011:00 - 12:0015:00 - 16:0016:00 - 17:00
+UG - 25, T2-T30, TRAINING - Sneha Priya p
+Date: 08-10-2026 to 19-12-2026
+Saturday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 25, T2-R36, TRAINING - Saranya V
+Date: 08-10-2026 to 19-12-2026
+Saturday: 10:00 - 11:0011:00 - 12:00
+Wednesday: 10:00 - 11:0011:00 - 12:00
+UG - 25, T2-I37, TRAINING - JAYPREETHA V R
+Date: 08-10-2026 to 19-12-2026
+Friday: 15:00 - 16:0016:00 - 17:00
+Wednesday: 15:00 - 16:0016:00 - 17:00
+UG - 25, T2-G33, TRAINING - Sneha Priya p
+Date: 08-10-2026 to 19-12-2026
+Friday: 15:00 - 16:0016:00 - 17:00
+Wednesday: 15:00 - 16:0016:00 - 17:00
+UG - 25, PHASE-1, TRAINING - AIDS & AIML
+Date: 02-10-2026 to 02-10-2026
+Thursday: 22:46 - 22:47
+UG - 25, T2-S26, TRAINING - Saranya V
+Date: 08-10-2026 to 19-12-2026
+Saturday: 13:00 - 14:0014:00 - 15:00
+Thursday: 13:00 - 14:0014:00 - 15:00
+UG - 25, T2-R25, TRAINING - JAYPREETHA V R
+Date: 08-10-2026 to 19-12-2026
+Friday: 13:00 - 14:0014:00 - 15:00
+Thursday: 13:00 - 14:0014:00 - 15:00
+UG - 25, T2-P40, TRAINING - JAYPREETHA V R
+Date: 08-10-2026 to 19-12-2026
+Saturday: 13:00 - 14:0014:00 - 15:00
+Thursday: 15:00 - 16:0016:00 - 17:00
+UG - 25, T2-P33, TRAINING - Sneha Priya p
+Date: 08-10-2026 to 19-12-2026
+Friday: 13:00 - 14:0014:00 - 15:00
+Thursday: 13:00 - 14:0014:00 - 15:00
+UG - 25, T2-I24, TRAINING - Sneha Priya p
+Date: 08-10-2026 to 19-12-2026
+Saturday: 13:00 - 14:0014:00 - 15:00
+Thursday: 15:00 - 16:0016:00 - 17:00
