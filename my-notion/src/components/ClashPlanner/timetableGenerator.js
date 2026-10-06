@@ -104,7 +104,8 @@ export function generateTimetables(selectedSubjects, preferences) {
         }
 
         for (const sec of sub.validSections) {
-            const currentObj = { subject: sub, section: sec };
+            const minimalSub = { code: sub.code, name: sub.name, credits: sub.credits };
+            const currentObj = { subject: minimalSub, section: sec };
             
             // Check overlap with existing before going deeper to optimize
             if (isCombinationValid([...currentCombo, currentObj])) {
@@ -117,8 +118,12 @@ export function generateTimetables(selectedSubjects, preferences) {
 
     search(0, []);
 
+    // Cap combinations to prevent localStorage QuotaExceededError and UI freezing
+    // Randomize slightly or just take the first 500 before scoring
+    const cappedCombinations = combinations.length > 500 ? combinations.slice(0, 500) : combinations;
+
     // 2. Score & Sort Combinations
-    combinations.sort((a, b) => {
+    cappedCombinations.sort((a, b) => {
         let scoreA = 0, scoreB = 0;
 
         const evalScore = (combo) => {
@@ -149,5 +154,5 @@ export function generateTimetables(selectedSubjects, preferences) {
         return evalScore(b) - evalScore(a);
     });
 
-    return combinations;
+    return cappedCombinations;
 }
