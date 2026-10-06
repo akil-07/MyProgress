@@ -136,6 +136,12 @@ function parseTabularFormat(lines) {
     const subjectsMap = {};
     for (const line of lines) {
         if (!line) continue;
+        
+        // Ignore PHASE-1 reference sections in tabular data
+        if (/PHASE\s*-?\s*1/i.test(line)) {
+            continue;
+        }
+
         const parts = line.split(/\||\t/).map(s => s.trim());
         if (parts.length >= 7) {
             const [code, name, credits, secName, staff, daysStr, time, room] = parts;
