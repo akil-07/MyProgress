@@ -86,7 +86,7 @@ function parseSecFormat(lines) {
         // 3. Detect new section
         if (line.startsWith('UG -') || line.startsWith('PG -') || line.startsWith('SH -') || /^UG\s*-/.test(line)) {
             // Ignore PHASE-1 reference sections
-            if (line.toUpperCase().includes('PHASE-1') || line.toUpperCase().includes('PHASE -1') || line.toUpperCase().includes('PHASE 1')) {
+            if (/PHASE\s*-?\s*1/i.test(line)) {
                 currentSection = null;
                 continue;
             }
