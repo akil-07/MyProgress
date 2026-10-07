@@ -29,79 +29,134 @@ const SortableItem = ({ id, repo, idx, handleRepoChange, removeRepo }) => {
     const style = {
         transform: CSS.Transform.toString(transform),
         transition,
-        display: 'flex', gap: 15, background: 'var(--bg-secondary)', 
-        padding: 16, borderRadius: 12, border: '1px solid var(--border)',
+        display: 'flex', gap: 16, 
+        background: isDragging ? 'rgba(30, 30, 35, 0.8)' : 'rgba(255, 255, 255, 0.02)', 
+        backdropFilter: 'blur(12px)',
+        padding: '20px', 
+        borderRadius: '16px', 
+        border: '1px solid rgba(255, 255, 255, 0.06)',
         alignItems: 'center',
-        boxShadow: isDragging ? '0 5px 15px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.05)',
+        boxShadow: isDragging ? '0 15px 35px rgba(0,0,0,0.4), 0 0 0 1px var(--accent)' : '0 4px 20px rgba(0,0,0,0.15)',
         zIndex: isDragging ? 999 : 1,
         position: isDragging ? 'relative' : 'static'
     };
 
+    const inputStyle = {
+        background: 'rgba(0, 0, 0, 0.2)', 
+        border: '1px solid rgba(255, 255, 255, 0.05)',
+        color: '#fff', 
+        borderRadius: '10px', 
+        outline: 'none', 
+        transition: 'all 0.2s ease',
+        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+    };
+
+    const inputFocus = (e) => {
+        e.target.style.borderColor = 'var(--accent)';
+        e.target.style.background = 'rgba(0, 0, 0, 0.4)';
+        e.target.style.boxShadow = '0 0 0 3px rgba(var(--accent-rgb), 0.15), inset 0 2px 4px rgba(0,0,0,0.1)';
+    };
+    const inputBlur = (e) => {
+        e.target.style.borderColor = 'rgba(255, 255, 255, 0.05)';
+        e.target.style.background = 'rgba(0, 0, 0, 0.2)';
+        e.target.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.1)';
+    };
+
     return (
-        <div ref={setNodeRef} style={style}>
+        <div ref={setNodeRef} style={style} className="sortable-row-premium">
             {/* Drag Handle */}
             <div 
                 {...attributes} 
                 {...listeners} 
-                style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', cursor: 'grab', touchAction: 'none' }} 
+                style={{ 
+                    color: 'rgba(255, 255, 255, 0.2)', display: 'flex', alignItems: 'center', 
+                    cursor: 'grab', touchAction: 'none', padding: '5px',
+                    transition: 'color 0.2s'
+                }} 
+                onMouseOver={e => e.currentTarget.style.color = 'var(--accent)'}
+                onMouseOut={e => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.2)'}
                 title="Drag to reorder"
             >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="9" cy="12" r="1"></circle>
-                  <circle cx="9" cy="5" r="1"></circle>
-                  <circle cx="9" cy="19" r="1"></circle>
-                  <circle cx="15" cy="12" r="1"></circle>
-                  <circle cx="15" cy="5" r="1"></circle>
-                  <circle cx="15" cy="19" r="1"></circle>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="12" r="1.5"></circle>
+                  <circle cx="9" cy="5" r="1.5"></circle>
+                  <circle cx="9" cy="19" r="1.5"></circle>
+                  <circle cx="15" cy="12" r="1.5"></circle>
+                  <circle cx="15" cy="5" r="1.5"></circle>
+                  <circle cx="15" cy="19" r="1.5"></circle>
                 </svg>
             </div>
             
             {/* Numbering */}
             <div style={{ 
-                width: 32, height: 32, borderRadius: 8, background: 'var(--bg-active)',
+                width: 36, height: 36, borderRadius: '10px', 
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.08), rgba(255,255,255,0.01))',
+                border: '1px solid rgba(255,255,255,0.05)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontWeight: 'bold', color: 'var(--accent)', flexShrink: 0
+                fontWeight: 'bold', color: 'var(--accent)', flexShrink: 0,
+                fontSize: '15px',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.1)'
             }}>
                 {idx + 1}
             </div>
             
             {/* Inputs */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div>
                     <input 
                         value={repo.title}
                         onChange={(e) => handleRepoChange(repo.id, 'title', e.target.value)}
-                        className="form-input"
-                        style={{ width: '100%', fontWeight: 600, padding: '8px 12px' }}
+                        style={{ ...inputStyle, width: '100%', fontWeight: 500, padding: '10px 14px', fontSize: '15px', letterSpacing: '0.3px' }}
+                        onFocus={inputFocus} onBlur={inputBlur}
                         placeholder="Experiment Title"
                     />
                 </div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                    <input 
-                        value={repo.date}
-                        onChange={(e) => handleRepoChange(repo.id, 'date', e.target.value)}
-                        className="form-input"
-                        style={{ width: 140, fontSize: 13, padding: '6px 10px' }}
-                        placeholder="DD/MM/YYYY"
-                    />
-                    <input 
-                        value={repo.url}
-                        onChange={(e) => handleRepoChange(repo.id, 'url', e.target.value)}
-                        className="form-input"
-                        style={{ flex: 1, fontSize: 13, padding: '6px 10px' }}
-                        placeholder="Paste Link (https://...)"
-                    />
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                    <div style={{ position: 'relative', width: 140 }}>
+                        <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </div>
+                        <input 
+                            value={repo.date}
+                            onChange={(e) => handleRepoChange(repo.id, 'date', e.target.value)}
+                            style={{ ...inputStyle, width: '100%', fontSize: '13px', padding: '8px 10px 8px 34px' }}
+                            onFocus={inputFocus} onBlur={inputBlur}
+                            placeholder="DD/MM/YYYY"
+                        />
+                    </div>
+                    <div style={{ position: 'relative', flex: 1 }}>
+                         <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.3)', pointerEvents: 'none' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        </div>
+                        <input 
+                            value={repo.url}
+                            onChange={(e) => handleRepoChange(repo.id, 'url', e.target.value)}
+                            style={{ ...inputStyle, width: '100%', fontSize: '13px', padding: '8px 10px 8px 34px', color: 'rgba(255,255,255,0.7)' }}
+                            onFocus={inputFocus} onBlur={inputBlur}
+                            placeholder="Paste Link (https://...)"
+                        />
+                    </div>
                 </div>
             </div>
             
             {/* Controls */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0, paddingLeft: '4px' }}>
                 <button 
-                    className="btn-secondary" 
-                    style={{ padding: '6px 10px', color: 'var(--danger)', borderColor: 'var(--danger)' }} 
+                    style={{ 
+                        background: 'transparent', border: 'none', 
+                        color: 'rgba(255, 255, 255, 0.2)', cursor: 'pointer',
+                        padding: '10px', borderRadius: '10px',
+                        transition: 'all 0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                    }}
+                    onMouseOver={(e) => { e.currentTarget.style.color = '#ff453a'; e.currentTarget.style.background = 'rgba(255, 69, 58, 0.1)' }}
+                    onMouseOut={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.2)'; e.currentTarget.style.background = 'transparent' }}
                     onClick={() => removeRepo(repo.id)}
-                    title="Remove"
-                >🗑️ Remove</button>
+                    title="Remove Experiment"
+                >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line>
+                    </svg>
+                </button>
             </div>
         </div>
     );
