@@ -91,9 +91,9 @@ function EmptyHome({ onCreatePage, pageCount }) {
             </p>
 
             {pageCount === 0 && (
-                <LiquidButton onClick={onCreatePage}>
+                <button className="btn-primary" onClick={onCreatePage}>
                     ✦ Create First Page
-                </LiquidButton>
+                </button>
             )}
 
             <div className="empty-tips-grid" style={{

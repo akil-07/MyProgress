@@ -105,9 +105,9 @@ export default function PreferencesStep({
 
             <div className="step-actions split">
                 <button className="back-btn" onClick={onBack} disabled={isGenerating}>← Back</button>
-                <LiquidButton onClick={onGenerate} disabled={isGenerating}>
+                <button className="btn-primary" onClick={onGenerate} disabled={isGenerating}>
                     {isGenerating ? <span className="spinner-small"></span> : '🚀 Generate Timetables'}
-                </LiquidButton>
+                </button>
             </div>
         </div>
     );

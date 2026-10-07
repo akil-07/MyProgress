@@ -22,9 +22,9 @@ export default function ConflictModal({ conflicts, onRemoveLeaveDays, onSkipSubj
                     <button className="base-btn secondary" onClick={onSkipSubjects}>
                         Skip These Subjects
                     </button>
-                    <LiquidButton onClick={onRemoveLeaveDays}>
+                    <button className="btn-primary" onClick={onRemoveLeaveDays}>
                         Remove Leave Days
-                    </LiquidButton>
+                    </button>
                 </div>
             </div>
         </>

@@ -65,12 +65,9 @@ export default function SubjectSelectStep({ subjects, selectedSubjects, setSelec
 
             <div className="step-actions split">
                 <button className="back-btn" onClick={onBack}>← Back</button>
-                <LiquidButton 
-                    onClick={onNext} 
-                    disabled={selectedSubjects.length === 0}
-                >
+                <button className="btn-primary" onClick={onNext} disabled={selectedSubjects.length === 0}>
                     Next: Preferences →
-                </LiquidButton>
+                </button>
             </div>
         </div>
     );

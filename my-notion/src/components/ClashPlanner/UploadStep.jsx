@@ -86,9 +86,9 @@ export default function UploadStep({ onParsed }) {
             {error && <div className="error-message">{error}</div>}
 
             <div className="step-actions">
-                <LiquidButton onClick={handleParse} disabled={loading}>
+                <button className="btn-primary" onClick={handleParse} disabled={loading}>
                     {loading ? 'Extracting...' : '🔍 Parse & Continue'}
-                </LiquidButton>
+                </button>
             </div>
         </div>
     );
