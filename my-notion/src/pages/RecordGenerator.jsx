@@ -11,6 +11,7 @@ export default function RecordGenerator() {
     const [allFetchedRepos, setAllFetchedRepos] = useState([])
     const [selectedImportIds, setSelectedImportIds] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
+    const [draggedItemIndex, setDraggedItemIndex] = useState(null)
 
     // Premium input styling
     const premiumInputStyle = {
@@ -399,12 +400,55 @@ export default function RecordGenerator() {
                         </div>
                     )}
                     {repos.map((repo, idx) => (
-                        <div key={repo.id} style={{ 
-                            display: 'flex', gap: 15, background: 'var(--bg-secondary)', 
-                            padding: 16, borderRadius: 12, border: '1px solid var(--border)',
-                            alignItems: 'center',
-                            boxShadow: '0 2px 8px rgba(0,0,0,0.05)'
-                        }}>
+                        <div 
+                            key={repo.id} 
+                            draggable
+                            onDragStart={(e) => {
+                                setDraggedItemIndex(idx)
+                                e.dataTransfer.effectAllowed = 'move'
+                                e.dataTransfer.setData('text/plain', idx)
+                            }}
+                            onDragOver={(e) => {
+                                e.preventDefault()
+                                e.dataTransfer.dropEffect = 'move'
+                            }}
+                            onDrop={(e) => {
+                                e.preventDefault()
+                                if (draggedItemIndex === null) return
+                                if (draggedItemIndex !== idx) {
+                                    setRepos(prev => {
+                                        const newRepos = [...prev]
+                                        const draggedItem = newRepos[draggedItemIndex]
+                                        newRepos.splice(draggedItemIndex, 1)
+                                        newRepos.splice(idx, 0, draggedItem)
+                                        return newRepos
+                                    })
+                                }
+                                setDraggedItemIndex(null)
+                            }}
+                            onDragEnd={() => setDraggedItemIndex(null)}
+                            style={{ 
+                                display: 'flex', gap: 15, background: 'var(--bg-secondary)', 
+                                padding: 16, borderRadius: 12, border: '1px solid var(--border)',
+                                alignItems: 'center',
+                                boxShadow: draggedItemIndex === idx ? '0 5px 15px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.05)',
+                                cursor: 'grab',
+                                opacity: draggedItemIndex === idx ? 0.5 : 1,
+                                transition: 'all 0.2s ease'
+                            }}
+                        >
+                            {/* Drag Handle */}
+                            <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }} title="Drag to reorder">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <circle cx="9" cy="12" r="1"></circle>
+                                  <circle cx="9" cy="5" r="1"></circle>
+                                  <circle cx="9" cy="19" r="1"></circle>
+                                  <circle cx="15" cy="12" r="1"></circle>
+                                  <circle cx="15" cy="5" r="1"></circle>
+                                  <circle cx="15" cy="19" r="1"></circle>
+                                </svg>
+                            </div>
+                            
                             {/* Numbering */}
                             <div style={{ 
                                 width: 32, height: 32, borderRadius: 8, background: 'var(--bg-active)',
