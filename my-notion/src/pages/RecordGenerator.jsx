@@ -342,184 +342,138 @@ export default function RecordGenerator() {
     // =========== STEP 3: PRINT VIEW ===========
     if (step === 3) {
         return (
-            <div className="record-generator-print-wrapper">
+            <div className="record-generator-print-wrapper" style={{ padding: '40px', maxWidth: 'none', margin: '0 auto' }}>
+                <div style={{ maxWidth: '900px', margin: '0 auto', background: '#fff', position: 'relative' }}>
+                
+                <div style={{ position: 'absolute', top: '-10px', right: '0px', fontSize: '11px', color: '#444', fontStyle: 'italic' }}>
+                    Made with MyNotion
+                </div>
+                
                 <style>
                     {`
                     @media print {
-                        @page { margin: 15mm; }
+                        @page { margin: 0; }
                         html, body, #root, .app-layout, .main-content {
                             height: auto !important;
                             overflow: visible !important;
                             display: block !important;
                             margin: 0 !important;
                             padding: 0 !important;
-                            background: #fff !important;
                         }
-                        .sidebar, .mobile-header, .top-bar, .no-print { display: none !important; }
+                        .sidebar, .mobile-header, .no-print { display: none !important; }
                         
-                        .record-generator-print-wrapper { width: 100%; margin: 0; padding: 0; background: #fff !important; }
-                        .document-paper { box-shadow: none !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; }
-                        .record-table { page-break-inside: auto; }
+                        .record-generator-print-wrapper { 
+                            width: 100%; 
+                            margin: 0; 
+                            padding: 0; 
+                        }
+                        .record-generator-print-wrapper img[alt="Saveetha Header"] {
+                            max-width: 650px !important; 
+                        }
+                        .record-table { page-break-inside: auto; margin-bottom: 10px !important; }
                         .record-table tr { page-break-inside: avoid; page-break-after: auto; }
-                        .record-generator-footer { page-break-inside: avoid; }
+                        .record-table th, .record-table td { padding: 5px 8px !important; }
+                        .qr-image { width: 55px !important; height: 55px !important; }
+                        
+                        /* Compress footer margins for print */
+                        .record-generator-footer { page-break-inside: avoid; margin-top: 15px !important; }
+                        .record-generator-footer p { margin-bottom: 25px !important; }
+                        .record-generator-footer .sig-block { margin-bottom: 20px !important; }
                     }
                     @media screen {
                         .record-generator-print-wrapper {
-                            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-                            overflow-y: auto; z-index: 9999;
-                            background-color: var(--bg-primary);
-                            padding-bottom: 80px;
-                        }
-                        .document-paper {
-                            box-shadow: 0 25px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
-                            border-radius: 12px;
-                            margin: 120px auto 40px auto !important; /* space for top bar */
-                        }
-                        .top-bar {
-                            position: fixed; top: 0; left: 0; width: 100%; height: 80px;
-                            background: rgba(10,10,12, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-                            border-bottom: 1px solid rgba(255,255,255,0.08);
-                            display: flex; align-items: center; justify-content: center; gap: 20px;
-                            z-index: 10000;
-                            box-shadow: 0 4px 30px rgba(0,0,0,0.3);
+                            position: fixed;
+                            top: 0;
+                            left: 0;
+                            width: 100vw;
+                            height: 100vh;
+                            overflow-y: auto;
+                            z-index: 9999;
+                            background-color: #ffffff !important;
+                            color: #000000 !important;
                         }
                     }
-                    
-                    /* General Document Styling */
-                    .document-paper {
-                        background: #ffffff;
-                        color: #0f172a;
-                        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                        padding: 60px 70px;
-                        max-width: 950px;
-                        position: relative;
-                        box-sizing: border-box;
+                    .record-generator-print-wrapper, .record-generator-print-wrapper * {
+                        color: #000000 !important;
                     }
-                    .document-paper * { color: #0f172a; }
-                    .document-paper h2 { font-weight: 800; color: #020617; letter-spacing: -0.5px; }
-                    .document-paper h3 { font-weight: 600; color: #334155; text-transform: uppercase; letter-spacing: 1.5px; font-size: 14px; margin-top: 5px; }
-                    
-                    /* Table Styling */
-                    .record-table { width: 100%; border-collapse: collapse; margin-top: 35px; margin-bottom: 40px; border: 2px solid #0f172a; }
-                    .record-table th, .record-table td { border: 1px solid #cbd5e1; padding: 14px 16px; text-align: center; vertical-align: middle; }
-                    .record-table th { background-color: #f8fafc !important; font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.8px; color: #0f172a !important; border-bottom: 2px solid #0f172a !important; }
-                    .record-table td { font-size: 14px; color: #1e293b; background-color: #ffffff; }
+                    .record-generator-print-wrapper a {
+                        color: #1a0dab !important;
+                    }
+                    .record-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; background-color: #fff !important; }
+                    .record-table th, .record-table td { border: 1px solid #000 !important; padding: 10px; text-align: center; font-size: 14px; background-color: #fff !important; color: #000 !important; }
+                    .record-table th { font-weight: bold; background-color: #f8f8f8 !important; }
                     .record-table td.text-left { text-align: left; }
-                    .record-table tr:nth-child(even) td { background-color: #fafafa; }
-                    
-                    /* Link and QR */
-                    .document-paper a { color: #2563eb !important; text-decoration: none; font-weight: 600; transition: color 0.2s; }
-                    .document-paper a:hover { color: #1d4ed8 !important; text-decoration: underline; }
-                    .qr-image-container { display: inline-flex; padding: 5px; border: 1px solid #e2e8f0; border-radius: 8px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-                    .qr-image { width: 65px; height: 65px; object-fit: contain; mix-blend-mode: multiply; }
-                    
-                    /* Footer Styling */
-                    .record-generator-footer { font-size: 15px; font-weight: 500; margin-top: 50px; line-height: 1.6; }
-                    .sig-block { display: flex; justify-content: space-between; margin-bottom: 30px; align-items: flex-end; }
-                    .sig-label { font-weight: 600; color: #334155; }
-                    .dotted-line { flex: 1; border-bottom: 1px dashed #cbd5e1; margin: 0 15px; transform: translateY(-4px); }
-                    .sig-value { font-weight: 700; color: #0f172a; font-size: 16px; }
+                    .qr-image { width: 70px; height: 70px; object-fit: contain; }
                     `}
                 </style>
 
-                {/* Floating Top Bar for Screen */}
-                <div className="top-bar">
-                    <button className="btn-secondary" onClick={() => setStep(2)} style={{ padding: '12px 24px', borderRadius: '12px', fontSize: '15px', fontWeight: 600 }}>
-                        <span style={{ marginRight: '8px' }}>←</span> Back to Editor
-                    </button>
-                    <button className="btn-primary" onClick={() => window.print()} style={{ padding: '12px 28px', borderRadius: '12px', fontSize: '15px', fontWeight: 600, boxShadow: '0 4px 15px var(--accent-light)' }}>
-                        <span style={{ marginRight: '8px' }}>🖨️</span> Print PDF
-                    </button>
+                {/* Controls */}
+                <div className="no-print" style={{ marginBottom: 20, display: 'flex', gap: 10 }}>
+                    <button className="btn-secondary" onClick={() => setStep(2)}>← Back to Editor</button>
+                    <button className="btn-primary" onClick={() => window.print()}>🖨️ Print to PDF</button>
                 </div>
 
-                {/* Actual Document Paper */}
-                <div className="document-paper">
-                    <div style={{ position: 'absolute', top: '25px', right: '35px', fontSize: '11px', color: '#94a3b8', fontStyle: 'italic', fontWeight: 500, letterSpacing: '0.5px' }}>
-                        Generated with MyNotion
+                {/* Header Section from Image */}
+                <div style={{ marginBottom: 20, textAlign: 'center', borderBottom: '2px solid #0056b3', paddingBottom: 15 }}>
+                    <img src="/HEADER.png" alt="Saveetha Header" style={{ width: '100%', maxWidth: '800px', objectFit: 'contain', display: 'block', margin: '0 auto' }} />
+                </div>
+
+                {/* Sub Header */}
+                <div style={{ textAlign: 'center', marginBottom: 20 }}>
+                    <h2 style={{ fontSize: '20px', margin: '0 0 10px 0' }}>{courseTitle}</h2>
+                    <h3 style={{ fontSize: '18px', margin: 0 }}>Table of content</h3>
+                </div>
+
+                {/* Table */}
+                <table className="record-table">
+                    <thead>
+                        <tr>
+                            <th style={{ width: '5%' }}>Exp</th>
+                            <th style={{ width: '15%' }}>Date</th>
+                            <th style={{ width: '40%' }}>Name of The Experiment</th>
+                            <th style={{ width: '15%' }}>QR Code</th>
+                            <th style={{ width: '10%' }}>Mark</th>
+                            <th style={{ width: '15%' }}>Signature</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {repos.map((repo, idx) => {
+                            const expNum = String(idx + 1).padStart(2, '0');
+                            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(repo.url)}`;
+
+                            return (
+                                <tr key={repo.id}>
+                                    <td>{expNum}</td>
+                                    <td>{repo.date}</td>
+                                    <td className="text-left">
+                                        <div style={{ marginBottom: 5, fontWeight: 'bold', fontSize: '15px' }}>{repo.title}</div>
+                                        <a href={repo.url} style={{ color: '#1a0dab', textDecoration: 'none', wordBreak: 'break-all', fontSize: '13px' }} target="_blank" rel="noopener noreferrer">
+                                            {repo.url}
+                                        </a>
+                                    </td>
+                                    <td><img src={qrUrl} alt={`QR for ${repo.title}`} className="qr-image" /></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                            )
+                        })}
+                    </tbody>
+                </table>
+
+                {/* Footer Declaration */}
+                <div className="record-generator-footer" style={{ marginTop: 25, fontSize: '14px', fontWeight: 'bold', color: '#000' }}>
+                    <p style={{ marginBottom: 35, color: '#000' }}>I confirm that the experiments and GitHub links provided are entirely my own work.</p>
+                    
+                    <div className="sig-block" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 25, color: '#000' }}>
+                        <div style={{color: '#000'}}>Name : {studentName}</div>
+                        <div style={{color: '#000'}}>Register Number : {registerNumber}</div>
                     </div>
-
-                    {/* Header Section */}
-                    <div style={{ marginBottom: 30, textAlign: 'center', borderBottom: '3px solid #1e3a8a', paddingBottom: 25 }}>
-                        <img src="/HEADER.png" alt="Saveetha Header" style={{ width: '100%', maxWidth: '750px', objectFit: 'contain', display: 'block', margin: '0 auto' }} />
+                    
+                    <div className="sig-block" style={{ display: 'flex', justifyContent: 'space-between', color: '#000' }}>
+                        <div style={{color: '#000'}}>Date : {date}</div>
+                        <div style={{color: '#000'}}>Learner's Signature</div>
                     </div>
-
-                    {/* Sub Header */}
-                    <div style={{ textAlign: 'center', marginBottom: 35 }}>
-                        <h2 style={{ fontSize: '22px', margin: '0 0 8px 0' }}>{courseTitle}</h2>
-                        <h3 style={{ margin: 0 }}>Table of content</h3>
-                    </div>
-
-                    {/* Table */}
-                    <table className="record-table">
-                        <thead>
-                            <tr>
-                                <th style={{ width: '6%' }}>Exp</th>
-                                <th style={{ width: '14%' }}>Date</th>
-                                <th style={{ width: '38%' }}>Name of The Experiment</th>
-                                <th style={{ width: '14%' }}>QR Code</th>
-                                <th style={{ width: '13%' }}>Mark</th>
-                                <th style={{ width: '15%' }}>Signature</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {repos.map((repo, idx) => {
-                                const expNum = String(idx + 1).padStart(2, '0');
-                                const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(repo.url)}`;
-
-                                return (
-                                    <tr key={repo.id}>
-                                        <td style={{ fontWeight: 600, color: '#475569' }}>{expNum}</td>
-                                        <td style={{ fontWeight: 500 }}>{repo.date}</td>
-                                        <td className="text-left">
-                                            <div style={{ marginBottom: 8, fontWeight: 700, fontSize: '15px', color: '#0f172a' }}>{repo.title}</div>
-                                            <a href={repo.url} style={{ fontSize: '13px', wordBreak: 'break-all', display: 'inline-block', lineHeight: 1.4 }} target="_blank" rel="noopener noreferrer">
-                                                {repo.url}
-                                            </a>
-                                        </td>
-                                        <td>
-                                            <div className="qr-image-container">
-                                                <img src={qrUrl} alt={`QR for ${repo.title}`} className="qr-image" />
-                                            </div>
-                                        </td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-                                )
-                            })}
-                        </tbody>
-                    </table>
-
-                    {/* Footer Declaration */}
-                    <div className="record-generator-footer">
-                        <p style={{ marginBottom: 45, textAlign: 'center', color: '#334155', fontStyle: 'italic' }}>
-                            "I confirm that the experiments and GitHub links provided are entirely my own work."
-                        </p>
-                        
-                        <div className="sig-block">
-                            <div style={{ display: 'flex', flex: 1, alignItems: 'flex-end', paddingRight: '20px' }}>
-                                <span className="sig-label">Name:</span>
-                                <span className="dotted-line"></span>
-                                <span className="sig-value">{studentName}</span>
-                            </div>
-                            <div style={{ display: 'flex', flex: 1, alignItems: 'flex-end', paddingLeft: '20px' }}>
-                                <span className="sig-label">Register No:</span>
-                                <span className="dotted-line"></span>
-                                <span className="sig-value">{registerNumber}</span>
-                            </div>
-                        </div>
-                        
-                        <div className="sig-block" style={{ marginTop: '40px' }}>
-                            <div style={{ display: 'flex', flex: 1, alignItems: 'flex-end', paddingRight: '20px' }}>
-                                <span className="sig-label">Date:</span>
-                                <span className="dotted-line"></span>
-                                <span className="sig-value">{date}</span>
-                            </div>
-                            <div style={{ display: 'flex', flex: 1, alignItems: 'flex-end', paddingLeft: '20px' }}>
-                                <span className="sig-label">Learner's Signature:</span>
-                                <span className="dotted-line"></span>
-                            </div>
-                        </div>
-                    </div>
+                </div>
                 </div>
             </div>
         )
