@@ -1,4 +1,111 @@
 import React, { useState } from 'react'
+import {
+  DndContext, 
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+const SortableItem = ({ id, repo, idx, handleRepoChange, removeRepo }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging
+    } = useSortable({ id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        display: 'flex', gap: 15, background: 'var(--bg-secondary)', 
+        padding: 16, borderRadius: 12, border: '1px solid var(--border)',
+        alignItems: 'center',
+        boxShadow: isDragging ? '0 5px 15px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.05)',
+        zIndex: isDragging ? 999 : 1,
+        position: isDragging ? 'relative' : 'static'
+    };
+
+    return (
+        <div ref={setNodeRef} style={style}>
+            {/* Drag Handle */}
+            <div 
+                {...attributes} 
+                {...listeners} 
+                style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center', cursor: 'grab', touchAction: 'none' }} 
+                title="Drag to reorder"
+            >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="9" cy="12" r="1"></circle>
+                  <circle cx="9" cy="5" r="1"></circle>
+                  <circle cx="9" cy="19" r="1"></circle>
+                  <circle cx="15" cy="12" r="1"></circle>
+                  <circle cx="15" cy="5" r="1"></circle>
+                  <circle cx="15" cy="19" r="1"></circle>
+                </svg>
+            </div>
+            
+            {/* Numbering */}
+            <div style={{ 
+                width: 32, height: 32, borderRadius: 8, background: 'var(--bg-active)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 'bold', color: 'var(--accent)', flexShrink: 0
+            }}>
+                {idx + 1}
+            </div>
+            
+            {/* Inputs */}
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div>
+                    <input 
+                        value={repo.title}
+                        onChange={(e) => handleRepoChange(repo.id, 'title', e.target.value)}
+                        className="form-input"
+                        style={{ width: '100%', fontWeight: 600, padding: '8px 12px' }}
+                        placeholder="Experiment Title"
+                    />
+                </div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                    <input 
+                        value={repo.date}
+                        onChange={(e) => handleRepoChange(repo.id, 'date', e.target.value)}
+                        className="form-input"
+                        style={{ width: 140, fontSize: 13, padding: '6px 10px' }}
+                        placeholder="DD/MM/YYYY"
+                    />
+                    <input 
+                        value={repo.url}
+                        onChange={(e) => handleRepoChange(repo.id, 'url', e.target.value)}
+                        className="form-input"
+                        style={{ flex: 1, fontSize: 13, padding: '6px 10px' }}
+                        placeholder="Paste Link (https://...)"
+                    />
+                </div>
+            </div>
+            
+            {/* Controls */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                <button 
+                    className="btn-secondary" 
+                    style={{ padding: '6px 10px', color: 'var(--danger)', borderColor: 'var(--danger)' }} 
+                    onClick={() => removeRepo(repo.id)}
+                    title="Remove"
+                >🗑️ Remove</button>
+            </div>
+        </div>
+    );
+}
 
 export default function RecordGenerator() {
     const [activeTab, setActiveTab] = useState('auto') // 'auto' | 'manual' | 'history'
@@ -11,7 +118,6 @@ export default function RecordGenerator() {
     const [allFetchedRepos, setAllFetchedRepos] = useState([])
     const [selectedImportIds, setSelectedImportIds] = useState([])
     const [searchTerm, setSearchTerm] = useState('')
-    const [draggedItemIndex, setDraggedItemIndex] = useState(null)
 
     // Premium input styling
     const premiumInputStyle = {
@@ -125,25 +231,27 @@ export default function RecordGenerator() {
         setRepos(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
     }
 
-    const moveRepo = (index, direction) => {
-        setRepos(prev => {
-            const newRepos = [...prev]
-            if (direction === 'up' && index > 0) {
-                const temp = newRepos[index];
-                newRepos[index] = newRepos[index - 1];
-                newRepos[index - 1] = temp;
-            } else if (direction === 'down' && index < newRepos.length - 1) {
-                const temp = newRepos[index];
-                newRepos[index] = newRepos[index + 1];
-                newRepos[index + 1] = temp;
-            }
-            return newRepos
-        })
-    }
-
     const removeRepo = (id) => {
         setRepos(prev => prev.filter(r => r.id !== id))
     }
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event) => {
+        const { active, over } = event;
+        if (over && active.id !== over.id) {
+            setRepos((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over.id);
+                return arrayMove(items, oldIndex, newIndex);
+            });
+        }
+    };
 
     const handleProceedToPrint = () => {
         const newEntry = {
@@ -399,121 +507,28 @@ export default function RecordGenerator() {
                             All experiments removed. Go back and fetch again!
                         </div>
                     )}
-                    {repos.map((repo, idx) => (
-                        <div 
-                            key={repo.id} 
-                            draggable
-                            onDragStart={(e) => {
-                                setDraggedItemIndex(idx)
-                                e.dataTransfer.effectAllowed = 'move'
-                                e.dataTransfer.setData('text/plain', idx)
-                            }}
-                            onDragOver={(e) => {
-                                e.preventDefault()
-                                e.dataTransfer.dropEffect = 'move'
-                            }}
-                            onDrop={(e) => {
-                                e.preventDefault()
-                                if (draggedItemIndex === null) return
-                                if (draggedItemIndex !== idx) {
-                                    setRepos(prev => {
-                                        const newRepos = [...prev]
-                                        const draggedItem = newRepos[draggedItemIndex]
-                                        newRepos.splice(draggedItemIndex, 1)
-                                        newRepos.splice(idx, 0, draggedItem)
-                                        return newRepos
-                                    })
-                                }
-                                setDraggedItemIndex(null)
-                            }}
-                            onDragEnd={() => setDraggedItemIndex(null)}
-                            style={{ 
-                                display: 'flex', gap: 15, background: 'var(--bg-secondary)', 
-                                padding: 16, borderRadius: 12, border: '1px solid var(--border)',
-                                alignItems: 'center',
-                                boxShadow: draggedItemIndex === idx ? '0 5px 15px rgba(0,0,0,0.2)' : '0 2px 8px rgba(0,0,0,0.05)',
-                                cursor: 'grab',
-                                opacity: draggedItemIndex === idx ? 0.5 : 1,
-                                transition: 'all 0.2s ease'
-                            }}
+                    
+                    <DndContext 
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={handleDragEnd}
+                    >
+                        <SortableContext 
+                            items={repos.map(r => r.id)}
+                            strategy={verticalListSortingStrategy}
                         >
-                            {/* Drag Handle */}
-                            <div style={{ color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }} title="Drag to reorder">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                  <circle cx="9" cy="12" r="1"></circle>
-                                  <circle cx="9" cy="5" r="1"></circle>
-                                  <circle cx="9" cy="19" r="1"></circle>
-                                  <circle cx="15" cy="12" r="1"></circle>
-                                  <circle cx="15" cy="5" r="1"></circle>
-                                  <circle cx="15" cy="19" r="1"></circle>
-                                </svg>
-                            </div>
-                            
-                            {/* Numbering */}
-                            <div style={{ 
-                                width: 32, height: 32, borderRadius: 8, background: 'var(--bg-active)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                fontWeight: 'bold', color: 'var(--accent)', flexShrink: 0
-                            }}>
-                                {idx + 1}
-                            </div>
-                            
-                            {/* Inputs */}
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                                <div>
-                                    <input 
-                                        value={repo.title}
-                                        onChange={(e) => handleRepoChange(repo.id, 'title', e.target.value)}
-                                        className="form-input"
-                                        style={{ width: '100%', fontWeight: 600, padding: '8px 12px' }}
-                                        placeholder="Experiment Title"
-                                    />
-                                </div>
-                                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-                                    <input 
-                                        value={repo.date}
-                                        onChange={(e) => handleRepoChange(repo.id, 'date', e.target.value)}
-                                        className="form-input"
-                                        style={{ width: 140, fontSize: 13, padding: '6px 10px' }}
-                                        placeholder="DD/MM/YYYY"
-                                    />
-                                    <input 
-                                        value={repo.url}
-                                        onChange={(e) => handleRepoChange(repo.id, 'url', e.target.value)}
-                                        className="form-input"
-                                        style={{ flex: 1, fontSize: 13, padding: '6px 10px' }}
-                                        placeholder="Paste Link (https://...)"
-                                    />
-                                </div>
-                            </div>
-                            
-                            {/* Controls */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
-                                <div style={{ display: 'flex', gap: 4 }}>
-                                    <button 
-                                        className="btn-secondary" 
-                                        style={{ padding: '6px 10px' }} 
-                                        onClick={() => moveRepo(idx, 'up')}
-                                        disabled={idx === 0}
-                                        title="Move Up"
-                                    >↑</button>
-                                    <button 
-                                        className="btn-secondary" 
-                                        style={{ padding: '6px 10px' }} 
-                                        onClick={() => moveRepo(idx, 'down')}
-                                        disabled={idx === repos.length - 1}
-                                        title="Move Down"
-                                    >↓</button>
-                                </div>
-                                <button 
-                                    className="btn-secondary" 
-                                    style={{ padding: '6px 10px', color: 'var(--danger)', borderColor: 'var(--danger)' }} 
-                                    onClick={() => removeRepo(repo.id)}
-                                    title="Remove"
-                                >🗑️ Remove</button>
-                            </div>
-                        </div>
-                    ))}
+                            {repos.map((repo, idx) => (
+                                <SortableItem 
+                                    key={repo.id} 
+                                    id={repo.id} 
+                                    repo={repo} 
+                                    idx={idx} 
+                                    handleRepoChange={handleRepoChange} 
+                                    removeRepo={removeRepo} 
+                                />
+                            ))}
+                        </SortableContext>
+                    </DndContext>
                     
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: 10 }}>
                         <button className="btn-secondary" onClick={addNewRepo} style={{ padding: '12px 20px', borderStyle: 'dashed', width: '100%', fontWeight: 600 }}>
