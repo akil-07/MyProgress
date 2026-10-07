@@ -546,8 +546,9 @@ export default function RecordGenerator() {
                 <form onSubmit={activeTab === 'auto' ? fetchRepos : activeTab === 'import' ? fetchAccountRepos : startManualEntry} style={{ 
                     display: 'flex', flexDirection: 'column', gap: 24, 
                     background: 'var(--bg-card)', padding: '35px', 
+                    backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                     borderRadius: '20px', border: '1px solid var(--border)',
-                    boxShadow: '0 8px 30px rgba(0,0,0,0.08)'
+                    boxShadow: 'var(--shadow-lg), 0 0 0 1px rgba(255, 255, 255, 0.05) inset'
                 }}>
                 {error && <div style={{ color: 'var(--danger)', padding: 12, border: '1px solid var(--danger)', borderRadius: 10, background: 'var(--danger-light)' }}>{error}</div>}
 
@@ -595,7 +596,8 @@ export default function RecordGenerator() {
 
                 <button type="submit" className="btn-primary" disabled={loading} style={{ 
                     marginTop: 10, padding: '14px', fontSize: '15px', fontWeight: 600,
-                    background: 'linear-gradient(135deg, #7c5cfc, #06b6d4)', border: 'none', borderRadius: '12px'
+                    background: 'var(--accent-gradient)', border: 'none', borderRadius: '12px',
+                    boxShadow: '0 4px 15px var(--accent-light)', color: '#fff', cursor: 'pointer', transition: 'all 0.2s'
                 }}>
                     {activeTab === 'auto' ? (loading ? 'Fetching from GitHub...' : 'Review & Edit Experiments ✨') 
                     : activeTab === 'import' ? (loading ? 'Fetching Repositories...' : 'Fetch My Repositories ✨') 

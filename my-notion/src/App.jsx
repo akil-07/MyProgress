@@ -8,7 +8,7 @@ import Login from './pages/Login.jsx'
 import useAuthStore from './store/authStore.js'
 
 // Apply saved theme immediately
-const savedTheme = localStorage.getItem('theme') || 'light'
+const savedTheme = localStorage.getItem('theme') || 'dark'
 document.documentElement.setAttribute('data-theme', savedTheme)
 
 export default function App() {
