@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import logo from '../assets/logo.jpg';
 
 const STEPS = [
     {
@@ -63,7 +64,9 @@ export default function Setup() {
             }}>
                 {/* Header */}
                 <div style={{ textAlign: 'center', padding: '16px 0' }}>
-                    <div style={{ fontSize: 48, marginBottom: 12 }}>✦</div>
+                    <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}>
+                        <img src={logo} alt="Logo" style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'cover' }} />
+                    </div>
                     <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: -0.5, color: 'var(--text-primary)', margin: 0 }}>
                         Welcome to MyNotion
                     </h1>

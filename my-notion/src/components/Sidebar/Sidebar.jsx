@@ -7,6 +7,8 @@ import useTaskStore from '../../store/taskStore.js'
 import useAuthStore from '../../store/authStore.js'
 import useMoodleStore from '../../store/moodleStore.js'
 import SearchModal from '../Search/SearchModal.jsx'
+import logo from '../../assets/logo.jpg'
+
 
 const EMOJIS = ['📄', '📝', '📌', '🗒️', '💡', '🎯', '🚀', '📚', '🗂️', '⭐', '🔥', '💎', '🌟', '🎨', '🏆', '🔖', '🧠', '✨', '🎪', '🌈', '🦋', '🦄', '🔬', '🍀', '🏔️', '🌊', '🎵', '🎮', '🌸', '🏄']
 
@@ -68,7 +70,7 @@ export default function Sidebar() {
                 {/* Header */}
                 <div className="sidebar-header">
                     <div className="sidebar-workspace">
-                        <div className="sidebar-workspace-icon">✦</div>
+                        <img src={logo} alt="Workspace Logo" className="sidebar-workspace-icon" style={{ display: 'block', padding: 0, objectFit: 'cover' }} />
                         <span className="sidebar-workspace-name">My Workspace</span>
                     </div>
                     <button className="sidebar-icon-btn theme-toggle" onClick={toggleTheme} title="Toggle theme">

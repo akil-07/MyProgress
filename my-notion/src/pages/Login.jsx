@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { signInWithPopup } from 'firebase/auth';
 import { auth, googleProvider } from '../services/firebase';
+import logo from '../assets/logo.jpg';
 
 export default function Login() {
     const [loading, setLoading] = useState(false);
@@ -28,7 +29,7 @@ export default function Login() {
             <div className="login-card">
                 {/* Logo */}
                 <div className="login-logo">
-                    <div className="login-logo-icon">✦</div>
+                    <img src={logo} alt="Logo" className="login-logo-icon" style={{ display: 'block', padding: 0, objectFit: 'cover' }} />
                     <span className="login-logo-text">MyNotion</span>
                 </div>
 
